@@ -60,9 +60,60 @@
     <section>
         <title>Yoda</title>
         	<para>
-                Fealadatleírás
+                Írjunk olyan Java programot, ami java.lang.NullPointerEx-el leáll, ha nem követjük a Yoda
+conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions</link>
             </para>
+			<para>A Yoda egy olyan programozási stylus, ahol a kifejezés két oldalát felcseréljük. Ez a technika segít elkerülni a NullPointerEx-et. Erre mutat példát az alábbi program:</para>
+			<para>
+			<programlisting language="java"![CDATA[
+			
+			public class Yoda {
+				public static void main(String[] args) {
+					String name = null;
+					if (name.equals("Reka")){}
 
+				}
+			}
+			]]></programlisting>
+			<figure>
+            <title>A program Yoda conditions nélkül</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/yoda1.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>A program Yoda conditions nélkül</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+
+			</para>
+			<para>
+			Láthatjuk, hogy itt még nincs használva a Yoda condition, így a program NullPointerEx-el hibára fut.
+			</para>
+			<para><programlisting language="java"![CDATA[
+			
+			public class WorkingYoda {
+				public static void main(String[] args) {
+					String name = null;
+					if ("Reka".equals(name)){}
+				}
+			}
+			]]></programlisting>
+			</para>
+			<figure>
+            <title>A program Yoda conditions-al</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/yoda2.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>A program Yoda conditions-al</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			<para>Itt már látszik, hogy csak fel kellett cseréljük az equals két oldalát és máris működik a program.</para>
+			
     </section>
 
     <section>
@@ -76,24 +127,65 @@
     <section>
         <title>EPAM: Java Object metódusok</title>
         	<para>
-                Fealadatleírás
+                Mutasd be a Java Object metódusait és mutass rá mely metódusokat érdemes egy saját
+osztályunkban felüldefiniálni és miért. (Lásd még Object class forráskódja)
             </para>
+			<para>Az öröklési fa legfelső szintjén az Object(java.lang.Object) osztály található, mely osztály az alábbi metódusokkal rendelkezik: protected Object clone(), boolean equals(Object obj), void finalize(), getClass(), int hashCode(), void notify(), void notifyAll(), String toString(), void wait() </para>
+			<para>A getClass metódussal az objektum futási osztályát kapjuk vissza.</para>
+			<para>Az equals metódussal két sztringet hasonlít össze, és megmondja, hogy egyenlőek-e vagy sem.</para>
+			<para>A clone() egy objektum pontos másolatát készíti el. Létrehoz egy új példányt az aktuális objektum osztályából, és inicializálja az összes mezőjét pontosan az objektum megfelelő mezőinek tartalmával.</para>
+			<para>A finalizer-t akkor hívják meg, amikor a JVM rájön, hogy ezt a különleges példányt szemétnek kell gyűjteni. Egy ilyen véglegesítő bármilyen műveletet végezhet, beleértve az objektum életre keltését is. A finalize fő célja azonban az objektumok által használt erőforrások felszabadítása, mielőtt eltávolítanák őket a memóriából. </para>
+			<para>A hashCode() egy egész értéket ad vissza, amelyet egy hash algoritmus generál</para>
+			<para>Amikor wait() metódust hívunk, arra kényszerítjük az aktuális szálat, hogy megvárja, amíg más szál ugyanarra az objektumra hívja a notify() vagy a notifyAll() metódust.</para>
+			<para>A toString() metódus az objektum karakterlánc-reprezentációját adja vissza. Ha bármilyen objektumot akarunk kiíratni, a java fordító belsőleg meghívja a toString() metódust az objektumon.</para>
+			<para>Példaprogram: <link xlink:href="../../../bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Student.java">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Student.java</filename>
+            </link>
+			</para>
 
     </section>
 
     <section>
         <title>EPAM: Eljárásorientál vs Objektumorientált</title>
         	<para>
-                Fealadatleírás
+                Írj egy 1 oldalas értekező esszé szöveget, amiben összehasonlítod az eljárásorientált és az
+objektumorientált paradigmát, igyekezve kiemelni az objektumorientált paradigma előnyeit!
             </para>
-
+			<para>Eljárás-orientált programozás (POP) és Objektum-orientált programozás (OOP) mindkettő a programozási megközelítés, amely magas szintű nyelvet használ a programozáshoz. </para>
+			<para>Az OOP programozás arra épül, hogy programunkat különböző modulokra tudjuk felosztani, melyet későbbiekben sokkal egyszerűbben bővíthetünk vagy módosíthatunk, emellett kódunk sokkal átláthatóbb lesz. </para>
+			<para>A POP programozás során a fő hangsúly az elvégzendő feladat sorrendjére irányul. Ha a program kiterjedt, akkor néhány kisebb függvény segítségével feloszthatjuk. Ezekben a függvényekben megosztják a globális adatokat, ezért felmerül az adatbiztonság kérdése is. </para>
+			<para>POP a folyamatábrát követi a feladat elvégzéséhez. Az OOP fő hangsúlya adatbiztonság mivel csak egy osztály objektumai férhetnek hozzá az osztály attribútumaihoz vagy funkciójához. A funkciók a nagy programok vagy alprogramok kis egységei, amelyek végrehajtják a fő feladat elvégzését. Ezzel szemben az osztály OOP attribútumai és funkciói meg vannak osztva az osztályok között tárgyak. A POP-ban nincs specifikus hozzáférési mód az attribútumok vagy funkciók elérésére a programban. Ezzel szemben az OOP-ban három public, private, protected hozzáférési mód létezik, amelyeket hozzáférési módszerként használnak attribútumok vagy funkciók eléréséhez. A POP nem támogatja a túlterhelés / polimorfizmus fogalmát. Az OOP igen. A POP-ban nincs fogalom az öröklésről, míg az OOP támogatja azt. A POP kevésbé biztonságos az OOP-hoz képest, mivel az OOP-ban a hozzáférési specifikátor korlátozza a hozzáférést olyan attribútumokhoz vagy funkciókhoz, amelyek növelik a biztonságot. Ha a POP-ban valamilyen adatot meg kell osztani a program összes funkciója között, akkor azt globálisan minden funkción kívül deklarálják. Míg az OOP-ban az osztály adattagjai az osztály tagfunkcióin keresztül érhetők el. A POP-ban nincs a barát funkció fogalma. Ezzel szemben az OOP-ban van egy olyan barát funkció fogalma, amely nem tagja az osztálynak, de mivel barát tag, hozzáférhet az osztály adat tagjának és tag funkcióinak eléréséhez. A POP-ban nincs fogalom a virtuális osztályokról, míg az OOP-ban a virtuális függvények támogatják a polimorfizmust.</para>
+			<para>A POP előnye, hogy lehetővé teszi, hogy ugyanazt a kódot több helyen is újra felhasználhassuk, megkönnyíti a programáramlás követését, képes modulok építésére. Hátránya azonban, hogy a globális adatok sebezhetők, az adatok a programon belül szabadon mozoghatnak, nehéz az adatok helyzetét ellenőrizni, a funkciók cselekvésorientáltak, a funkciók nem képesek kapcsolódni a probléma elemeihez, a valós problémák nem modellezhetők, a kód részei egymástól függenek, az egyik alkalmazáskód nem használható másik alkalmazásban, az adatok továbbítása a függvények használatával történik.</para>
+			<para>Az OOP előnye, hogy az objektumok segítenek a feladat particionálásában a projektben, a biztonságos programokat adatrejtés segítségével lehet felépíteni, potenciálisan leképezheti az objektumokat, lehetővé teszi az objektumok különböző osztályokba sorolását. Emellett az objektum-orientált rendszerek könnyedén frissíthetők, a redundáns kódok öröklés útján kiküszöbölhetők, a kódok az újrafelhasználhatósággal kibővíthetők, nagyobb modulitás érhető el, az adatok absztrakciója növeli a megbízhatóságot, rugalmas a dinamikus kötési koncepció miatt, az információ elrejtésével elválasztja az alapvető specifikációt a megvalósításától. Hátránya azonban, hogy több erőforrást igényel, az objektumok dinamikus viselkedése RAM tárolást igényel, az észlelés és a hibakeresés nehezebb az összetett alkalmazásokban, amikor az átadást végrehajtják, az öröklés osztályaikat szorosan összekapcsolja, ami befolyásolja a tárgyak újrahasznosíthatóságát.</para>
+			<para>Az OOP kijavítja a POP hibáit az „objektum” és az „osztályok” fogalmának bevezetésével. Fokozza az adatbiztonságot, valamint az objektumok automatikus inicializálását és tisztítását. Az OOP lehetővé teszi az objektum több példányának létrehozását interferencia nélkül.</para>
+			
     </section>
 
      <section>
         <title>EPAM: Objektum példányosítás programozási mintákkal</title>
         	<para>
-                Fealadatleírás
+                Hozz példát mindegyik “creational design pattern”-re és mutasd be mikor érdemes használni őket!
             </para>
+			<para>A Factory Method egy olyan tervezési minta, amely interfészt biztosít objektumok létrehozásához egy szuperosztályban, de lehetővé teszi az alosztályok számára a létrehozandó objektumok típusának megváltoztatását.</para>
+			<para>Példaprogram: <link xlink:href="../../../bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Factory2">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Factory2</filename>
+            </link></para>
+			<para>Az Abstract Factory olyan tervezési minta, amely lehetővé teszi kapcsolódó objektumok családjainak előállítását anélkül, hogy megadná a konkrét osztályokat.</para>
+			<para>Példaprogram: <link xlink:href="../../../bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/AbstractFactory">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/AbstractFactory</filename>
+            </link></para>
+			<para>A Builder egy tervezési minta, amely lehetővé teszi összetett objektumok lépésről lépésre történő elkészítését.</para>
+			<para>Példaprogram: <link xlink:href="../../../bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Builder">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Builder</filename>
+            </link></para>
+			<para>A Prototype egy olyan tervezési minta, amely lehetővé teszi a meglévő objektumok másolását anélkül, hogy a kódot az osztályuktól függené.</para>
+			<para>Példaprogram: <link xlink:href="../../../bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Prototype">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Prototype</filename>
+            </link></para>
+			<para>A Singleton olyan tervezési minta, amely lehetővé teszi, hogy egy osztálynak csak egy példánya legyen, miközben globális hozzáférési pontot biztosít ehhez a példányhoz.</para>
+			<para>Példaprogram: <link xlink:href="../../../bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Singleton">
+                <filename>bhax/thematic_tutorials/bhax_textbook_IgyNeveldaProgramozod/forraskodok/Singleton</filename>
+            </link></para>
 
     </section>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
