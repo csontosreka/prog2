@@ -7,66 +7,247 @@
     </info>
 
     <section>
-        <title>Reverse engineering UML osztálydiagram</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
         <title>Forward engineering UML osztálydiagram</title>
         	<para>
-                Fealadatleírás
+                UML-ben tervezzünk osztályokat és generáljunk belőle forrást!
             </para>
+			<figure>
+            <title>A program UML terve</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/uml.jpeg" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>UML terv</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			<programlisting language="java"><![CDATA[
+			
+			package order;
 
-    </section>
+public class Costumer {
+    private String name;
+    private String address;
+    private String mobileNumber;
 
-    <section>
-        <title>Egy esettan</title>
-        	<para>
-                Fealadatleírás
-            </para>
+    public String getName() {
+        return name;
+    }
 
-    </section>
+    public String getAddress() {
+        return address;
+    }
 
-    <section>
-        <title>BPMN</title>
-        	<para>
-                Fealadatleírás
-            </para>
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+}
+			
+			]]></programlisting>
+			
+			<para>A Costumer osztályban az UML terv szerint megadjuk a vásárló nevét, címét és telefonszámát, majd megadjuk az ezekhez tartozó gettereket.</para>
+			
+			<programlisting language="java"><![CDATA[
+			package order;
 
-    </section>
+public class Item {
+    private String name;
+    private int price;
 
-    <section>
-        <title>TeX UML</title>
-        	<para>
-                Fealadatleírás
-            </para>
+    public String getName() {
+        return name;
+    }
 
+    public int getPrice() {
+        return price;
+    }
+}
+			]]></programlisting>
+			<para>Az Item osztályban a termék nevét, árát és a hozzájuk tartozó gettereket láthatjuk.</para>
+			<programlisting language="java"><![CDATA[
+			package order;
+
+public enum DeliveryType {
+    NO_DELIVERY, GLS
+}
+			
+			]]></programlisting>
+			<para>A DeliveryType enumban megadjuk, hogy milyen szállítási típusok vannak.</para>
+			<programlisting language="java"><![CDATA[
+			package order;
+
+public class Order {
+    private String id;
+    private String date;
+    private int price;
+    private DeliveryType deliveryType;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public DeliveryType getDeliveryType() {
+        return deliveryType;
+    }
+
+}
+		]]></programlisting>
+		<para>Az Order osztályban a rendeléshez szükséges adatokat és azok gettereit adtam meg.</para>
+		
+		<programlisting language="java"><![CDATA[
+		package order;
+
+public class SpecialOrder extends Order{
+
+}
+		]]></programlisting>
+		<para>A SpecialOrder egy kiegészítés az Order osztályhoz.</para>
+		
     </section>
 
     <section>
         <title>EPAM: Neptun tantárgyfelvétel modellezése UML-ben</title>
         	<para>
-                Fealadatleírás
+              Modellezd le a Neptun rendszer tárgyfelvételéhez szükséges objektumokat UML diagramm segítségével.  
             </para>
+			<para>Az UML (Unified Modeling Language) szabványos, általános célú modellező nyelv, üzleti elemzők, rendszertervezők, szoftvermérnökök számára. Grady Booch, Ivar Jacobson és James Rumbaugh egyesített munkájának terméke. Az objektum orientált (OO) modellezés módszerét alkalmazni lehet a való világ bonyolultságának leírására. Az UML egy gyakorlati, objektum orientált modellező megoldás, nagy méretű programrendszerek modelljeinek vizuális dokumentálására alkalmas eszköz. Az UML módszer és leíró nyelv segítségével különböző nézőpontú szöveges és grafikus modellek készíthetőek többek közt rendszerekről, szervezetekről, szereplőkről, üzleti tevékenységekről és folyamatokról, logikai összetevőkről, szoftverekről, programokról, valamint adatbáziksokról. </para>
+			<figure>
+            <title>A program UML terve</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/epam_uml.jpeg" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>UML terv</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			
 
     </section>
 
     <section>
         <title>EPAM: Neptun tantárgyfelvétel UML diagram implementálás</title>
         	<para>
-                Fealadatleírás
+                Implementáld le az előző feladatban létrehozott diagrammot egy tetszőleges nyelven.
             </para>
+			<programlisting language="java"><![CDATA[
+			package student;
+
+import java.util.Set;
+import subject.Subject;
+
+public class Student {
+    private String name;
+    private String neptunId;
+    private Set<Subject> subjects;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<Subject> getSubjects() {
+        return subjects;
+    }
+
+    public String getNeptunId() {
+        return neptunId;
+    }
+
+    public void addSubject(Subject subject){
+        this.subjects.add(subject);
+    }
+
+    public void removeSubject(Subject subject){
+        this.subjects.remove(subject);
+    }
+
+}
+			]]></programlisting>
+			<para>A Student classban megadjuk a tanuló nevét, Neptun kódját, valamint egy halmazban eltároljuk a felvett tárgyait. Ezekre beállítjuk a gettereket. Létrehozunk egy addSubject metódust, amivel tárgyakat tudunk hozzáadni a halmazunkhoz, valamint egy removeSubject metódust, amivel törölni tudunk.</para>
+			<programlisting language="java"><![CDATA[
+			package lecturer;
+
+public class Lecturer {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+}
+			]]></programlisting>
+			<para>A Lecturer osztályban az oktató adatait adjuk meg.</para>
+			<programlisting language="java"><![CDATA[
+			package subject;
+
+import java.util.Set;
+import student.Student;
+import lecturer.Lecturer;
+
+public class Subject {
+    private String id;
+    private String name;
+    private SubjectType subjectType;
+    private Set<Student> students;
+    private Set<Lecturer> lecturers;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
+
+    public Set<Student> getStudents() {
+        return students;
+    }
+
+    public Set<Lecturer> getLecturers() {
+        return lecturers;
+    }
+
+    public void addNewStudents(Student student){
+        this.students.add(student);
+    }
+
+    public void addNewLecturers(Lecturer lecturer){
+        this.lecturers.add(lecturer);
+    }
+
+}
+			]]></programlisting>
+			<para>A Subject osztályban a tárgyra vonatkozó adatokat adjuk meg. Létrehozunk majd egy enumot a tárgy típusaira, valamint lesz egy Student és egy Lecturer halmazunk. Itt is ugyanúgy megadjuk a gettereket, valamint két metódust, az egyikkel hallgatókat, a másikkal pedik oktatókat adhatunk a halmazunkhoz.</para>
+			<para>Ezek mellett két alosztályt is létrehozunk, az egyik a CurriculumSubject, a másik pedig a NonCurriculumSubject. Mindkettő a Subject osztályt egészíti ki. </para>
 
     </section>
 
     <section>
         <title>EPAM: OO modellezés</title>
         	<para>
-                Fealadatleírás
+             Írj egy 1 oldalas esszét arról, hogy OO modellezés során milyen elveket tudsz követni (pl.: SOLID, KISS, DRY, YAGNI).   
             </para>
+			<para>Az objektum-orientált számítógépes programozásban a SOLID öt tervezési elv rövidítése, amelynek célja a szoftvertervek érthetőbbé, rugalmasabbá és fenntarthatóbbá tétele. Ez nem kapcsolódik a GRASP szoftvertervezési elvekhez. A SOLID elvek elméletét Robert C. Martin vezette be 2000-ben a Design Principles and Design Patterns című cikkében, bár a SOLID rövidítést később Michael Feathers vezette be. Koncepciója: Single-responsibility principle: Egy osztálynak csak egyetlen felelőssége kell, hogy legyen, vagyis a szoftver specifikációjának csak egy részén végzett változtatások befolyásolhatják az osztály specifikációját. Open–closed principle: "A szoftveralanyoknak ... nyitva kell lenniük a kiterjesztésre, de zárva a módisításra." Liskov substitution principle: A programban lévő objektumoknak az altípusok példányaival cserélhetőknek kell lenniük anélkül, hogy a program helyességét megváltoztatnák. Interface segregation principle: Sok ügyfélspecifikus interfész jobb, mint egy általános célú interfész. Dependency inversion principle: Absztrakcióktól kell függni, nem konkretizációktól.</para>
+			<para>A KISS, a keep it simple, stupid rövidítése, olyan tervezési elv, amelyet az amerikai haditengerészet 1960-ban jegyzett fel. A KISS elv szerint a legtöbb rendszer akkor működik a legjobban, ha egyszerűbbé teszik, nem pedig bonyolulttá teszik őket, ezért a tervezésnél az egyszerűségnek kell kulcsfontosságúnak lennie, és kerülni kell a felesleges bonyolultságot. </para>
+			<para>A DRY, azaz Don't repeat yourself a szoftverfejlesztés alapelve, amelynek célja a szoftverminták megismétlődésének csökkentése, absztrakciókkal való helyettesítés vagy adatok normalizálása a redundancia elkerülése érdekében. A DRY elv a következőképpen van megfogalmazva: "Minden tudásnak egyetlen, egyértelmű és hiteles képviselettel kell rendelkeznie a rendszeren belül". Az elvet Andy Hunt és Dave Thomas fogalmazták meg The Pragmatic Programmer című könyvükben. Az elvet alkalmazzák még adatbázis-sémákon, tesztterveken, a build rendszeren, sőt dokumentáción is. A DRY elv sikeres alkalmazásakor a rendszer bármely elemének módosítása nem igényel más logikailag nem kapcsolódó elemek megváltoztatását.</para>
+			<para>A YAGNI a "You aren't gonna need it" rövidítése, amely az extrém programozás (XP) alapelve, amely szerint a programozónak csak addig kell hozzáadnia a funkciókat, amíg szükségesnek nem találják. Az XP társalapítója, Ron Jeffries azt írta: "Mindig akkor hajtsa végre a dolgokat, amikor valóban szüksége van rájuk, soha ne, amikor csak azt látja, hogy szüksége van rájuk." Számos egyéb gyakorlattal kombinálva, például folyamatos refaktorálással, folyamatos automatizált egységteszteléssel és folyamatos integrációval kívánják használni. Folyamatos refaktorálás nélkül használva rendezetlen kódhoz és hatalmas átdolgozáshoz vezethet, amelyet technical debt-nek neveznek.</para>
 
     </section>    
         
