@@ -65,25 +65,618 @@
     <section>
         <title>EPAM: Order of everything</title>
         	<para>
-                Fealadatleírás
-            </para>
+                Collection-ok rendezése esetén jellemzően futási időben derül ki, ha olyan típusú objektumokat próbálunk rendezni, amelyeken az összehasonlítás nem értelmezett (azaz T típus esetén nem implementálják a Comparable &lt; T &gt; interface-t). Pl. ClassCastException a Collections.sort() esetében, vagy ClassCastException a Stream.sorted() esetében. Írj olyan metódust, amely tetszőleges Collection esetén vissza adja az elemeket egy List-ben növekvően rendezve, amennyiben az elemek összehasonlíthatóak velük azonos típusú objektumokkal. Ha ez a feltétel nem teljesül, az eredményezzen syntax error-t. Például: List &lt; Integer &gt; actualOutput = createOrderedList(input); Ahol az input Collection&lt; Integer &gt; típusú. Természetesen más típusokkal is működnie kell, feltéve, hogy implementálják a Comparable interface-t.
+			</para>
+			<programlisting language="java"><![CDATA[
+			import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+public class OrderOfEverythingTest {
+
+    @ParameterizedTest
+    @MethodSource("collectionsToSortDataProvider")
+    public void testOrderShouldReturnExpectedListWhenCollectionIsPassed(Collection<Integer> input, List<Integer> expectedOutput) {
+        // Given as parameters
+
+        // When
+        // createOrderedList(List.of(new OrderOfEverythingTest()));
+        // ^ ez piros, az OrderOfEverythingTest nem implementálja a Comparable<OrderOfEverythingTest> -et
+        List<Integer> actualOutput = createOrderedList(input);
+
+        // Then
+        assertThat(actualOutput, equalTo(expectedOutput));
+    }
+
+    private static Stream<Arguments> collectionsToSortDataProvider() {
+        return Stream.of(
+            Arguments.of(Collections.emptySet(), Collections.emptyList()),
+            Arguments.of(Set.of(1), List.of(1)),
+            Arguments.of(Set.of(2,1), List.of(1,2))
+        );
+    }
+
+    private <T extends Comparable<T>> List<T> createOrderedList(Collection<T> input) {
+        return input.stream()
+            .sorted()
+            .collect(Collectors.toList());
+    }
+}
+			]]></programlisting>
 
     </section>
 
     <section>
         <title>EPAM: Bináris keresés és Buborék rendezés implementálása</title>
         	<para>
-                Fealadatleírás
-            </para>
+            Implementálj egy Java osztályt, amely képes egy előre definiált n darab Integer tárolására. Ennek az osztálynak az alábbi funkcionalitásokkal kell rendelkeznie:</para>
+			<para>- Elem hozzáadása a tárolt elemekhez</para>
+			<para>- Egy tetszőleges Integer értékről tudja eldönteni, hogy már tároljuk-e (ehhez egy bináris keresőt implementálj)</para>
+			<para>A tárolt elemeket az osztályunk be tudja rendezni és a rendezett (pl növekvő sorrend) struktúrával vissza tud térni (ehhez egy buborék rendezőt implementálj)</para>
+			<programlisting language="java"><![CDATA[
+			public class IntegerCollection {
 
+	int[] array;
+	int index = 0;
+	int size;
+	boolean sorted = true;
+
+	public IntegerCollection(int size) {
+		this.size = size;
+		this.array = new int[size];
+	}
+
+	public IntegerCollection(int[] array) {
+		this.size = array.length;
+		this.index = this.size;
+		this.array = array;
+		this.sorted = false;
+	}
+
+	public void add(int value) {
+		if (size <= index) {
+			throw new IllegalArgumentException("The collection is full");
+		}
+		sorted = false;
+		array[index++] = value;
+	}
+
+	public boolean contains(int value) {
+		if (!sorted) {
+			sort();
+		}
+
+		int left = 0, right = size - 1;
+		while (left <= right) {
+			int mid = left + (right - left) / 2;
+
+			if (array[mid] == value) {
+				return true;
+			}
+
+			if (array[mid] < value) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		}
+
+		return false;
+	}
+
+	public int[] sort() {
+		for (int i = 0; i < size - 1; i++) {
+			for (int j = 0; j < size - i - 1; j++) {
+				if (array[j] > array[j + 1]) {
+					int temp = array[j];
+					array[j] = array[j + 1];
+					array[j + 1] = temp;
+				}
+			}
+		}
+		sorted = true;
+		return array;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(array);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof IntegerCollection)) {
+			return false;
+		}
+		IntegerCollection other = (IntegerCollection) obj;
+		return Arrays.equals(array, other.array);
+	}
+
+	@Override
+	public String toString() {
+		return "IntegerCollection [array=" + Arrays.toString(array) + "]";
+	}
+
+}
+			
+			]]></programlisting>
+			<programlisting language="java"><![CDATA[
+			public class Main {
+
+	public static void main(String[] args) {
+		IntegerCollection collection = new IntegerCollection(3);
+		collection.add(0);
+		collection.add(2);
+		collection.add(1);
+		System.out.println(collection);
+		collection.sort();
+		System.out.println(collection);
+		System.out.println(collection.contains(0));
+		System.out.println(collection.contains(1));
+		System.out.println(collection.contains(2));
+		System.out.println(collection.contains(3));
+		System.out.println(collection.contains(4));
+	}
+
+}
+			]]></programlisting>
+			<figure>
+            <title>Output</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/IntegerCollection.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Output</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			<para>Az output első sorában kiíratjuk a még nem rendezett tömbünket, majd meghívjuk rá a sort() metódust, ezután újra kiíratjuk és láthatjuk a már rendezett tömböt. Ezt követően megnézzük, hogy bizonyos elemek tagjai-e a tömbünknek. Az outputon láthatjuk, hogy a 0,1,2 még tagja, azonban a 4,5 már nem.</para>
+			
     </section>
 
     <section>
         <title>EPAM: Saját HashMap implementáció</title>
         	<para>
-                Fealadatleírás
+            Írj egy saját java.util.Map implementációt, mely nem használja a Java Collection API-t. Az implementáció meg kell feleljen az összes megadott unit tesztnek, nem kell tudjon kezelni null értékű kulcsokat és a “keySet”, “values”, “entrySet” metódusok nem kell támogassák az elem törlést.    
             </para>
+			<programlisting language="java"><![CDATA[
+			import java.util.*;
+import java.util.function.BiPredicate;
 
+public class ArrayMap<K, V> implements Map<K, V> {
+
+  private static final int INITIAL_SIZE = 16;
+  private static final String NULL_KEY_NOT_SUPPORTED = "This Map implementation does not support null keys!";
+
+  private int size = 0;
+  private K[] keys = (K[]) new Object[INITIAL_SIZE];
+  private V[] values = (V[]) new Object[INITIAL_SIZE];
+
+  @Override
+  public int size() {
+    return size;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return size <= 0;
+  }
+
+  @Override
+  public boolean containsKey(Object key) {
+    Objects.requireNonNull(key, NULL_KEY_NOT_SUPPORTED);
+
+    return searchItemInArray(key, keys, Object::equals) != -1;
+  }
+
+  @Override
+  public boolean containsValue(Object value) {
+    int valueIndex = searchItemInArray(value, values, Object::equals);
+    return valueIndex > -1 && keys[valueIndex] != null;
+  }
+
+  @Override
+  public V get(Object key) {
+    Objects.requireNonNull(key, NULL_KEY_NOT_SUPPORTED);
+    if(size <= 0) {
+      return null;
+    }
+
+    int keyIndex = searchItemInArray(key, keys, Object::equals);
+    if (keyIndex > -1) {
+      return values[keyIndex];
+    }
+
+    return null;
+  }
+
+  @Override
+  public V put(K key, V value) {
+    Objects.requireNonNull(key, NULL_KEY_NOT_SUPPORTED);
+
+    int keyIndex = searchItemInArray(key, keys, Objects::equals);
+    if (keyIndex < 0) {
+      keyIndex = findFirstEmptyPlace();
+      if (keyIndex < 0) {
+        expandArrays();
+      }
+      keyIndex = size;
+    }
+
+    V prevValue = values[keyIndex];
+
+    keys[keyIndex] = key;
+    values[keyIndex] = value;
+    size++;
+
+    return prevValue;
+  }
+
+  @Override
+  public V remove(Object key) {
+    Objects.requireNonNull(key, NULL_KEY_NOT_SUPPORTED);
+
+    int keyIndex = searchItemInArray(key, keys, Object::equals);
+    if (keyIndex > -1) {
+      V prevValue = values[keyIndex];
+
+      keys[keyIndex] = null;
+      values[keyIndex] = null;
+      size--;
+
+      return prevValue;
+    }
+
+    return null;
+  }
+
+  @Override
+  public void putAll(Map<\? extends K, ? extends V> m) {
+    m.forEach(this::put);
+  }
+
+  @Override
+  public void clear() {
+    Arrays.fill(keys, null);
+    Arrays.fill(values, null);
+    size = 0;
+  }
+
+  @Override
+  public Set<K> keySet() {
+    Set<K> result = new HashSet<>();
+    for(K i : keys) {
+      if (i != null) {
+        result.add(i);
+      }
+    }
+
+    return result;
+  }
+
+  @Override
+  public Collection<V> values() {
+    Collection<V> result = new ArrayList<>();
+    for(V i : values) {
+      if (i != null) {
+        result.add(i);
+      }
+    }
+
+    return result;
+  }
+
+  @Override
+  public Set<Entry<K, V>> entrySet() {
+    Set<Entry<K, V>> result = new HashSet<>();
+    for(int i = 0; i < keys.length; ++i) {
+      K key = keys[i];
+      if (key != null) {
+          V value = values[i];
+          result.add(new AbstractMap.SimpleEntry<>(key, value));
+      }
+    }
+
+    return result;
+  }
+
+
+  private <I> int searchItemInArray(I item, I[] array, BiPredicate<I, I> equalFunction) {
+    for (int index = 0; index < array.length; index++) {
+      if (equalFunction.test(item, array[index]))
+        return index;
+    }
+
+    return -1;
+  }
+
+  private int findFirstEmptyPlace() {
+    return searchItemInArray(null, keys, Objects::equals);
+  }
+
+  private void expandArrays() {
+    int expandedSize = size * 2;
+
+    keys = Arrays.copyOf(keys, expandedSize);
+    values = Arrays.copyOf(values, expandedSize);
+  }
+
+}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+public class ArrayMapTest {
+
+  private static final String TEST_KEY = "key";
+  private static final String TEST_VALUE = "value";
+  private static final String NEW_TEST_VALUE = "newValue";
+
+  private static final ArrayMap<String, String> EMPTY_MAP = new ArrayMap<>();
+
+  @ParameterizedTest
+  @MethodSource("provideMapForSize")
+  public void sizeShouldReturnCorrectSizeForGivenMap(Map<String, String> arrayMap, int expectedSize) {
+    // Given
+
+    // When
+    int actualSize = arrayMap.size();
+
+    // Then
+    assertThat(actualSize, equalTo(expectedSize));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideMapForSize")
+  public void isEmptyShouldReturnCorrectValueForGivenMap(Map<String, String> arrayMap, int expectedSize) {
+    // Given
+    boolean expectedIsEmpty = expectedSize <= 0;
+
+    // When
+    boolean actualIsEmpty = arrayMap.isEmpty();
+
+    // Then
+    assertThat(actualIsEmpty, equalTo(expectedIsEmpty));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideMapForContainsKeyOrValue")
+  public void containsKeyShouldReturnCorrectContainsKeyForGivenMap(Map<String, String> arrayMap, String key, boolean expectedContainsKey) {
+    // Given
+
+    // When
+    boolean actualContainsKey = arrayMap.containsKey(key);
+
+    // Then
+    assertThat(actualContainsKey, equalTo(expectedContainsKey));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideMapForContainsKeyOrValue")
+  public void containsValueShouldReturnCorrectContainsValueForGivenMap(Map<String, String> arrayMap, String key, boolean expectedContainsValue) {
+    // Given
+
+    // When
+    boolean actualContainsKey = arrayMap.containsValue(key);
+
+    // Then
+    assertThat(actualContainsKey, equalTo(expectedContainsValue));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideMapForGet")
+  public void getShouldReturnCorrectValueForGivenMap(Map<String, String> arrayMap, String key, String expectedValue) {
+    // Given
+
+    // When
+    String actualValue = arrayMap.get(key);
+
+    // Then
+    assertThat(actualValue, equalTo(expectedValue));
+  }
+
+  @Test
+  public void putShouldAddNewValueAndReturnPreviousOne() {
+    // Given
+    Map<String, String> arrayMap = generateGivenSizeMap(3);
+    arrayMap.put(TEST_KEY, TEST_VALUE);
+
+    // When
+    String previousValue = arrayMap.put(TEST_KEY, NEW_TEST_VALUE);
+
+    // Then
+    assertThat(previousValue, equalTo(TEST_VALUE));
+    assertThat(arrayMap.get(TEST_KEY), equalTo(NEW_TEST_VALUE));
+
+  }
+
+  @Test
+  public void putShouldCorrectlyExpandInnerArraysIfNeeded() {
+    // Given
+
+    // When
+    Map<String, String> arrayMap = generateGivenSizeMap(100);
+
+    // Then
+    assertThat(arrayMap.size(), equalTo(100));
+    for(int i = 0; i < 100; i++) {
+      String keyValue = String.valueOf(i);
+      assertThat(arrayMap.get(keyValue), equalTo(keyValue));
+    }
+  }
+
+  @Test
+  public void removeShouldDeleteKeyAndValueFromMap() {
+    // Given
+    Map<String, String> arrayMap = new ArrayMap<>();
+    arrayMap.put(TEST_KEY, TEST_VALUE);
+
+    // When
+    arrayMap.remove(TEST_KEY);
+
+    // Then
+    assertThat(arrayMap.size(), equalTo(0));
+    assertThat(arrayMap.containsKey(TEST_KEY), equalTo(false));
+    assertThat(arrayMap.containsValue(TEST_VALUE), equalTo(false));
+  }
+
+  @Test
+  public void putAllShouldAddAllEntriesToMap() {
+    // Given
+    Map<String, String> originalMap = generateGivenSizeMap(10);
+    Map<String, String> resultMap = new ArrayMap<>();
+
+    // When
+    resultMap.putAll(originalMap);
+
+    // Then
+    for(int i = 0; i < 10; i++) {
+      String keyValue = String.valueOf(i);
+      assertThat(resultMap.get(keyValue), equalTo(keyValue));
+    }
+  }
+
+  @Test
+  public void clearShouldRemoveAllKeysAndValues() {
+    // Given
+    Map<String, String> arrayMap = generateGivenSizeMap(2);
+    arrayMap.put(TEST_KEY, TEST_VALUE);
+
+    // When
+    arrayMap.clear();
+
+    // Then
+    assertThat(arrayMap.size(), equalTo(0));
+    assertThat(arrayMap.get(TEST_KEY), equalTo(null));
+  }
+
+  @Test
+  public void keySetShouldReturnSetContainingAllKeys() {
+    // Given
+    Map<String, String> arrayMap = generateGivenSizeMap(3);
+
+    // When
+    Set<String> keySet = arrayMap.keySet();
+
+    // Then
+    assertThat(keySet.size(), equalTo(3));
+    for(int i = 0; i < 3; i++) {
+      String k = String.valueOf(i);
+      assertThat(keySet.contains(k), equalTo(true));
+    }
+  }
+
+  @Test
+  public void valueShouldReturnCollectionContainingAllValues() {
+    // Given
+    Map<String, String> arrayMap = generateGivenSizeMap(3);
+
+    // When
+    Collection<String> values = arrayMap.values();
+
+    // Then
+    assertThat(values.size(), equalTo(3));
+    for(int i = 0; i < 3; i++) {
+      String k = String.valueOf(i);
+      assertThat(values.contains(k), equalTo(true));
+    }
+  }
+
+  @Test
+  public void entrySetShouldReturnSetContainingAllEntries() {
+    // Given
+    Map<String, String> arrayMap = generateGivenSizeMap(3);
+
+    // When
+    Set<Map.Entry<String, String>> entries = arrayMap.entrySet();
+
+    // Then
+    assertThat(entries.size(), equalTo(3));
+    for(Map.Entry<String, String> entry : entries) {
+      assertThat(entry.getKey(), equalTo(entry.getValue()));
+    }
+  }
+
+  private static Stream<Arguments> provideMapForSize() {
+    Map<String, String> removedItemMap = generateGivenSizeMap(5);
+    removedItemMap.remove(String.valueOf(2));
+
+    Map<String, String> removedEmptyMap = generateGivenSizeMap(1);
+    removedEmptyMap.remove(String.valueOf(0));
+
+    return Stream.of(
+        Arguments.of(EMPTY_MAP, 0),
+        Arguments.of(generateGivenSizeMap(2), 2),
+        Arguments.of(generateGivenSizeMap(10), 10),
+        Arguments.of(removedItemMap, 4),
+        Arguments.of(removedEmptyMap, 0)
+    );
+  }
+
+  private static Stream<Arguments> provideMapForContainsKeyOrValue() {
+    Map<String, String> arrayMap = generateGivenSizeMap(2);
+
+    return Stream.of(
+        Arguments.of(EMPTY_MAP, "0", false),
+        Arguments.of(arrayMap, "1", true),
+        Arguments.of(arrayMap, "2", false),
+        Arguments.of(generateGivenSizeMap(5), "asd", false)
+    );
+  }
+
+  private static Stream<Arguments> provideMapForGet() {
+    Map<String, String> arrayMap = generateGivenSizeMap(2);
+    arrayMap.put("key", "value");
+
+    return Stream.of(
+        Arguments.of(EMPTY_MAP, "0", null),
+        Arguments.of(arrayMap, "0", "0"),
+        Arguments.of(arrayMap, "2", null),
+        Arguments.of(arrayMap, "key", "value")
+    );
+  }
+
+  private static Map<String, String> generateGivenSizeMap(int size) {
+    ArrayMap<String, String> result = new ArrayMap<>();
+    IntStream.range(0, size)
+        .forEachOrdered(i -> result.put(String.valueOf(i), String.valueOf(i)));
+
+    return result;
+  }
+
+}
+
+			]]></programlisting>
     </section>
         
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
