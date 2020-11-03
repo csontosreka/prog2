@@ -7,66 +7,226 @@
     </info>
 
     <section>
-        <title>JDK osztályok</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
         <title>Másoló-mozgató szemantika</title>
         	<para>
-                Fealadatleírás
+             Kódcsipeteken (copy és move ctor és assign) keresztül vesd össze a C++11 másoló és a mozgató szemantikáját, a mozgató konstruktort alapozd a mozgató értékadásra!
             </para>
+			<programlisting language="c++"><![CDATA[
+			BinRandTree(const BinRandTree& old) {
+				std::cout << "BT copy ctor" << std::endl;
 
-    </section>
+				root = cp(old.root, old.treep);
 
-    <section>
-        <title>Hibásan implementált RSA törése</title>
-        	<para>
-                Fealadatleírás
-            </para>
+			}
+			BinRandTree& operator=(const BinRandTree& old) {
+				std::cout << "BT copy assign" << std::endl;
 
-    </section>
+				BinRandTree tmp{ old };
+				std::swap(*this, tmp);
+				return *this;
+			}
 
-    <section>
-        <title>Változó argumentumszámú ctor</title>
-        	<para>
-                Fealadatleírás
-            </para>
+			BinRandTree(BinRandTree&& old) {
+				std::cout << "BT move ctor" << std::endl;
 
-    </section>
+				root = nullptr;
+				*this = std::move(old);
+			}
 
-    <section>
-        <title>Összefoglaló</title>
-        	<para>
-                Fealadatleírás
-            </para>
+			BinRandTree& operator=(BinRandTree&& old) {
+				std::cout << "BT move assign" << std::endl;
+
+				std::swap(old.root, root);
+				std::swap(old.treep, treep);
+
+				return *this;
+			}
+			]]></programlisting>
+			<figure>
+            <title>Output</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/bintree.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Output</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			<para>Ezt a kódcsipetet az előző félév binfa forráskódjából vettem ki, hiszen itt jól látszik, hogy a másoló értékadást a másoló konstruktorra, valamint a mozgató konstruktort a mozgató értékadásra alapoztuk. Mivel egy fát akarunk átmásolni egy másikba, így meghívódik a copy assign. Az ebben található BinRandTree tmp{old} sor miatt meghívódik a copy ctor. Majd a swap miatt meghívódik a move ctor, amiben található move miatt meghívódik a move assign. </para>
+			
 
     </section>
 
     <section>
         <title>EPAM: It's gone. Or is it?</title>
         	<para>
-                Fealadatleírás
+            Adott a következő osztály:    
             </para>
+			<programlisting language="java"><![CDATA[
+			public class BugousStuffProducer {
+				private final Writer writer;
+				public BugousStuffProducer(String outputFileName) throws IOException {
+					writer = new FileWriter(outputFileName);
+				}
+				public void writeStuff() throws IOException {
+					writer.write("Stuff");
+				}
+				@Override
+				public void finalize() throws IOException {
+					writer.close();
+				}
+			}
+			
+			]]></programlisting>
+			<para>
+			Mutass példát arra az esetre, amikor előfordulhat, hogy bár a program futása során meghívtuk a writeStuff() metódust, a fájl, amibe írtunk még is üres. 
+			</para>
+			<para>Magyarázd meg, miért. Mutass alternatívát.</para>
+			
+			<programlisting language="java"><![CDATA[
+			import java.io.FileWriter;
+			import java.io.IOException;
+			import java.io.Writer;
+
+			public class GoneOrIsIt {
+
+				private static class BugousStuffProducer {
+					private final Writer writer;
+					public BugousStuffProducer(String outputFileName) throws IOException {
+						writer = new FileWriter(outputFileName);
+					}
+					public void writeStuff() throws IOException {
+						writer.write("Stuff");
+					}
+					@Override
+					public void finalize() throws IOException {
+						writer.close();
+					}
+				}
+
+				public static void main(String[] args) throws IOException {
+					BugousStuffProducer bugousStuffProducer = new BugousStuffProducer("example.txt");
+					bugousStuffProducer.writeStuff();
+					System.gc();
+				}
+			}
+			]]></programlisting>
+			<para>Itt azért lesz üres a txt, mivel nem garantált, hogy a main() után lefut a finalize().</para>
+			<programlisting language="java"><![CDATA[
+			import java.io.FileWriter;
+			import java.io.IOException;
+			import java.io.Writer;
+
+			public class GoneOrIsItFixed {
+				private static class BugousStuffProducer implements AutoCloseable {
+					private final Writer writer;
+
+					public BugousStuffProducer(String outputFileName) throws
+							IOException {
+						writer = new FileWriter(outputFileName);
+					}
+					public void writeStuff() throws IOException {
+						writer.write("Stuff");
+					}
+
+					@Override
+					public void close() throws Exception {
+						writer.close();
+					}
+				}
+
+				public static void main(String[] args) throws Exception {
+					try(BugousStuffProducer bugousStuffProducer = new BugousStuffProducer("fixedExample.txt")){
+						bugousStuffProducer.writeStuff();
+					}
+				}
+			}
+			]]></programlisting>
+			
 
     </section>
 
     <section>
         <title>EPAM: Kind of equal</title>
         	<para>
-                Fealadatleírás
+            Adott az alábbi kódrészlet.  
             </para>
+			<programlisting language="java"><![CDATA[
+			// Given
+			String first = "...";
+			String second = "...";
+			String third = "...";
+			// When
+			var firstMatchesSecondWithEquals = first.equals(second);
+			var firstMatchesSecondWithEqualToOperator = first == second;
+			var firstMatchesThirdWithEquals = first.equals(third);
+			var firstMatchesThirdWithEqualToOperator = first == third;
+			]]></programlisting>
+			<para>
+			Változtasd meg a String third = "..."; sort úgy, hogy a firstMatchesSecondWithEquals, firstMatchesSecondWithEqualToOperator, firstMatchesThirdWithEquals értéke true, a firstMatchesThirdWithEqualToOperator értéke pedig false legyen. Magyarázd meg, mi történik a háttérben.
+			</para>
+			
+			<programlisting language="java"><![CDATA[
+			import static org.hamcrest.CoreMatchers.is;
+			import static org.hamcrest.MatcherAssert.assertThat;
+
+			import org.junit.jupiter.api.Test;
+			public class KindofEqualTest {
+
+				@Test
+				public void testKindofEqualExercise() {
+					// Given
+					String first = "...";
+					String second = "...";
+					String third = new String("...");
+
+					// When
+					var firstMatchesSecondWithEquals = first.equals(second);
+					var firstMatchesSecondWithEqualToOperator = first == second;
+					var firstMatchesThirdWithEquals = first.equals(third);
+					var firstMatchesThirdWithEqualToOperator = first == third;
+
+					// Then
+					assertThat(firstMatchesSecondWithEquals, is(true));
+					assertThat(firstMatchesSecondWithEqualToOperator, is(true));
+					assertThat(firstMatchesThirdWithEquals, is(true));
+					assertThat(firstMatchesThirdWithEqualToOperator, is(false));
+				}
+
+			}
+			
+			]]></programlisting>
+			<para>
+			A first és a second ugyanarra a objektumra referencia a String interning miatt, a third pedig egy másik, de azonos tartalmú objektum.
+			</para>
 
     </section>
 
     <section>
         <title>EPAM: Java GC</title>
         	<para>
-                Fealadatleírás
+            Mutasd be nagy vonalakban hogyan működik Java-ban a GC (Garbage Collector). Lehetséges az OutOfMemoryError kezelése, ha igen milyen esetekben?   
             </para>
+			<para>Források:</para>
+			<para><link xlink:href="https://medium.com/@hasithalgamge/seven-types-of-java-garbage-collectors-6297a1418e82">https://medium.com/@hasithalgamge/seven-types-of-java-garbage-collectors-6297a1418e82</link></para>
+			<para><link xlink:href="https://stackoverflow.com/questions/2679330/catching-java-lang-outofmemoryerror">https://stackoverflow.com/questions/2679330/catching-java-lang-outofmemoryerror</link></para>
+			<para>A Java olyan objektum-orientált programozási nyelv, amiben van Automatic Garbage Collection. A Java automatikusan lefoglalja és elosztja a memóriát, így a programokat nem terheli ez a feladat. A Java-12-ben 7 garbage collector típust különböztetünk meg. Mint fejlesztő fontos, hogy tudjuk mikor melyik GC-t használjuk, hiszen mindnek megvannak az előnyei és a hátrányai, így a saját projektünkhöz megfelelően kell választanunk. </para>
+			<para>1. Serial Garbage Collector:</para>
+			<para>Ez a legegyszerűbb GC, amit alapvetően single thread környezethez terveztek. Ez a GC megvalósítás fagyasztja az összes alkalmazásszálat, amikor fut. Egyetlen szálat használ a szemétszállításhoz. Ezért nem jó ötlet több szálon futó alkalmazásokban, például szerver környezetben használni.</para>
+			<para>2. Paralell Garbage Collector:</para>
+			<para>Ez több szállat használ a szemétszállításhoz. Abban hasonlít a Serial Garbage Collector-hoz, hogy ez is lefagyasztja az összes alkalmazásszálat míg szemetet szállít. Azoknak az alkalmazásoknak a legalkalmasabb, amelyek elviselhetik az alkalmazás szüneteit.</para>
+			<para>3. Concurrent Mark Sweep (CMS) Garbage Collector:</para>
+			<para>Több szemétszállító szálat használ, felkeresi a kupac memóriában az elszállítani kívánt példányokat, ezeket megjelöli, majd „kisöpri” a memóriából. Olyan alkalmazásokhoz ajánlott használni, melyek meg tudják osztani a processzor erőforrásait a GC-vel az alkalmazás futása közben.</para>
+			<para>4. G1 (Garbage First) Garbage Collector:</para>
+			<para>Felosztja a kupac memóriát, és párhuzamosan gyűjt bennük. Miután minden területen megjelölte a szemetet megnézi, hogy melyik terület a leginkább üres és elsőnek ott kezd el gyűjtögetni. Olyan alkalmazásokra tervezték, amelyek több processzoros gépeken futnak nagy memóriaterülettel.</para>
+			<para>5. Epsilon Garbage Collector:</para>
+			<para>Az Epsilon nem működő vagy passzív szemétgyűjtő. Lefoglalja a memóriát az alkalmazás számára, de a nem használt objektumokat nem gyűjti össze. A szemétgyűjtő célja az alkalmazások teljesítményének mérése és kezelése. </para>
+			<para>6. Z Garbage Collector:</para>
+			<para>A ZGC minden költséges munkát egyidejűleg végez, anélkül, hogy 10 ms-nál hosszabb időre leállítaná az alkalmazásszálak végrehajtását, ami alkalmassá teszi alacsony késleltetést igénylő alkalmazásokhoz és / vagy nagyon nagy heap-et használó alkalmazásokhoz.</para>
+			<para>7. Shenandoah:</para>
+			<para>A Shenandoah egy rendkívül alacsony szünetidővel rendelkező szemétgyűjtő, amely csökkenti a GC szünetidejét azzal, hogy több szemétgyűjtési munkát végez a futó Java programmal egyidejűleg.</para>
+			<para>Általában, hogy az OutOfMemoryError egy blokkmemória-kiosztás miatt következik be, amely nem elégedett a kupac megmaradt erőforrásaival. Amikor egy hiba eldobásra kerül, a kupac ugyanannyi allokált objektumot tartalmaz, mint a sikertelen kiosztás előtt, és ideje, hogy eldobja a futásidejű objektumok hivatkozásait, hogy még több memória felszabadulhasson, aminek tisztításra lehet szüksége. Ezekben az esetekben kockázatos folytatni, hiszen nem lehetünk benne teljesen biztosak, hogy a JVM javítható állapotban van.</para>
 
     </section>     
         
