@@ -4,71 +4,349 @@
         <keywordset>
             <keyword/>
         </keywordset>
-    </info>
-
-    <section>
-        <title>FUTURE tevékenység editor</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>OOCWC Boost ASIO hálózatkezelése</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>SamuCam</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>BrainB</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>OSM térképre rajzolása</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>     
+    </info>  
 
     <section>
         <title>EPAM: XML feldolgozás</title>
         	<para>
-                Fealadatleírás
+            Adott egy koordinátákat és államokat tartalmazó XML (kb 210ezer sor), ezt az XML-t feldolgozva szeretnék létrehozni egy SVG fájlt, melyben minden város megjelenik egy pont formájában az adott koordináták alapján (tetszőleges színnel)</para> 
+			<para>Plusz feladat: A városokat csoportosíthatjuk államok szerint, és minden állam külön színnel jelenjen meg a térképen, így látszódni fognak a határok is.
             </para>
+			
+			<programlisting language="java"><![CDATA[
+			import lombok.Builder;
+			import lombok.Data;
 
+			@Data
+			@Builder
+			public class City {
+
+				private String coordinateX;
+				private String coordinateY;
+				private String state;
+
+			}			
+			]]></programlisting>
+			<para>A City osztályban megadjuk az X és Y koordinátákat, valamint az államot, és meghívjuk rá a lombok builder-ét, valamint Data-t.</para>
+			<programlisting language="java"><![CDATA[
+			public class ParserSolution {
+
+				private static final String INPUT_FILE = "src/main/resources/input.xml";
+				private static final String OUTPUT_FILE = "src/main/resources/map.svg";
+
+				public void parse() throws XMLStreamException, TransformerException, FileNotFoundException {
+					List<City> cityList = createCityList();
+					Map<String, String> colorsOfStates = createColorsOfStates(cityList);
+					Document document = createDOMSource(cityList, colorsOfStates);
+					TransformerFactory.newInstance().newTransformer().transform(new DOMSource(document), new StreamResult(OUTPUT_FILE));
+				}
+
+				private Document createDOMSource(List<City> cityList, Map<String, String> colorsOfStates) {
+					Document document = SVGDOMImplementation.getDOMImplementation().createDocument(SVGDOMImplementation.SVG_NAMESPACE_URI, "svg", null);
+					Element rootElement = createRootElement(document);
+					cityList.forEach(city -> {
+						Element element = document.createElementNS(SVGDOMImplementation.SVG_NAMESPACE_URI, "circle");
+						element.setAttributeNS(null, "cy", city.getCoordinateX());
+						element.setAttributeNS(null, "cx", city.getCoordinateY());
+						element.setAttributeNS(null, "fill", colorsOfStates.get(city.getState()));
+						element.setAttributeNS(null, "r", "1");
+						rootElement.appendChild(element);
+					});
+					return document;
+				}
+
+				private Element createRootElement(Document document) {
+					Element rootElement = document.getDocumentElement();
+					rootElement.setAttributeNS(null, "width", "800");
+					rootElement.setAttributeNS(null, "height", "600");
+					return rootElement;
+				}
+
+				private Map<String, String> createColorsOfStates(List<City> cityList) {
+					return cityList.stream()
+							.map(City::getState)
+							.distinct()
+							.collect(Collectors.toMap(hexColor -> hexColor, hexColor -> randomHexColor()));
+				}
+
+				private List<City> createCityList() throws XMLStreamException, FileNotFoundException {
+					XMLStreamReader xmlStreamReader = XMLInputFactory.newFactory().createXMLStreamReader(new FileInputStream(INPUT_FILE));
+					List<City> cityList = new LinkedList<>();
+					CityBuilder builder = City.builder();
+
+					while (xmlStreamReader.hasNext()) {
+						int actual = xmlStreamReader.next();
+						if (isStartElement(actual, "coordinateX", xmlStreamReader)) {
+							builder.coordinateX(xmlStreamReader.getElementText());
+						} else if (isStartElement(actual, "coordinateY", xmlStreamReader)) {
+							builder.coordinateY(xmlStreamReader.getElementText());
+						} else if (isStartElement(actual, "state", xmlStreamReader)) {
+							builder.state(xmlStreamReader.getElementText());
+						} else if (isEndElement(actual, "city", xmlStreamReader)) {
+							cityList.add(builder.build());
+						}
+					}
+					return cityList;
+				}
+
+				private boolean isStartElement(int actual, String tagName, XMLStreamReader xmlStreamReader) {
+					return actual == XMLStreamReader.START_ELEMENT && tagName.equals(xmlStreamReader.getLocalName());
+				}
+
+				private boolean isEndElement(int actual, String tagName, XMLStreamReader xmlStreamReader) {
+					return actual == XMLStreamReader.END_ELEMENT && tagName.equals(xmlStreamReader.getLocalName());
+				}
+
+				private String randomHexColor() {
+					return String.format("#%06X", new Random().nextInt(0x1000000));
+				}
+
+			}			
+			]]></programlisting>
+			<para>A Solution osztályban először megadjuk az input és az output fájlt. A parse()-ban listába szedjük a városokat a createCityList() segítségével. Itt az input XML-t feldolgozzuk az XMLStreamReader-el, majd az adatoknak létrehozunk egy láncolt listát és meghívjuk a City builderét. Amíg van az XML-ben feldolgozandó elem, majd megnézzk, hogy az aktuális elem kezdőelem-e, majd az adatokat átadjuk a City builderének. Mikor ez elkészült, akkor ezt az egészet betesszük a cityList-be.</para>
+			<para>A színeket úgy állítjuk be, hogy a cityList-ből csinálunk egy streamet, amiben már csak a state-ekkel fogunk dolgozni. Erre fogunk egy Map-et létrehozni, amiben a név lesz, és egy randomHexColor()-t, ami majd létrehozza a színeket.</para>
+			<para>Ezután már csak az output fájlt kell létrehozzuk. Ez egy SVGDOMImplementation-el fog megtörténni. A root elementben meghatározzuk a kép felbontását. Ezek után végigmegyünk a city-ken, amiknek létrehozzuk a köröket, amiknek definiáljuk a koordinátáját, színét, a state-jét és sugarát. Ezeket az elemeket pedig hozzáfűzzük a rootElement-hez. Ha ez kész, akkor visszatérünk a kész dokumentummal, amit kiírunk egy output fájlba.</para>
+			
+			<figure>
+            <title>Eredmény</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/usa.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Eredmény</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
     </section>
 
     <section>
         <title>EPAM: ASCII Art</title>
         	<para>
-                Fealadatleírás
-            </para>
+                ASCII Art in Java! Implementálj egy Java parancssori programot, ami beolvas egy képet és kirajzolja azt a parancssorba és / vagy egy szöveges fájlba is ASCII karakterekkel.
+			</para>
+			<programlisting language="java"><![CDATA[
+			public class Main {
+
+				public static void main(String[] args) throws IOException {
+					String imageName = args[0];
+					String textFileName = args.length != 2 ? null : args[1];
+					OutputStream outputStream = textFileName == null ? System.out : new FileOutputStream(textFileName);
+					BufferedImage image = ImageIO.read(new File(imageName));
+
+					new AsciiPrinter(outputStream, image).print();
+				}
+
+			}
+			
+			]]></programlisting>
+			<para>Létrehozunk egy outputStream-et a fájlnév alapján, ami azt jeleti, hogy ha nem adunk meg fájlnevet, akkor konzolra fogja kiírni a végeredményt. Az ImageIO segítségével tudjuk beolvasni a képet. Erre fogjuk meghívni az AsciiPrinter-t.</para>
+			
+			<programlisting language="java"><![CDATA[
+			public class AsciiPrinter {
+
+				private static final char[] ASCII_PIXELS = { '$', '#', '*', ':', '.', ' ' };
+				private static final byte[] NEW_LINE = "\n".getBytes();
+
+				private OutputStream outputStream;
+				private BufferedImage image;
+
+				public AsciiPrinter(OutputStream outputStream, BufferedImage image) {
+					this.outputStream = outputStream;
+					this.image = image;
+				}
+
+				public void print() throws IOException {
+					for (int i = 0; i < image.getHeight(); i++) {
+						for (int j = 0; j < image.getWidth(); j++) {
+							outputStream.write(getAsciiChar(image.getRGB(j, i)));
+						}
+						outputStream.write(NEW_LINE);
+					}
+				}
+
+				public static char getAsciiChar(int pixel) {
+					return getAsciiCharFromGrayScale(getGreyScale(pixel));
+				}
+
+				public static int getGreyScale(int argb) {
+					int red = (argb >> 16) & 0xff;
+					int green = (argb >> 8) & 0xff;
+					int blue = (argb) & 0xff;
+					return (red + green + blue) / 3;
+				}
+
+				public static char getAsciiCharFromGrayScale(int greyScale) {
+					return ASCII_PIXELS[greyScale / 51];
+				}
+
+			}
+			]]></programlisting>
+			<para>Az AsciiPrinter classban elsőnek megadjuk, hogy milyen karaktereket szeretnénk használni. Ezután példányosítjuk a main-ben megadott outputStream-et és a képet. A print methoddal végigmegyünk a kép magasságán és szélességén, majd az RGB színeket átalakítjuk szürkeárnyalatos színné, amiből megkapjuk az ASCII kataktert úgy, hogy a szürkeárnyalatos értéket elosztjuk 51-el és az annak megfelelő karaktert kiíratjuk.</para>
+			<figure>
+            <title>Eredmény</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/emoji.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Eredmény</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
 
     </section>
 
     <section>
         <title>EPAM: Titkos üzenet, száll a gépben!</title>
         	<para>
-                Fealadatleírás
+            Implementájl egy olyan parancssori alkalmazást, amely a billentyűzetről olvas soronként ASCII karakterekből álló sorokat, és a beolvasott szöveget Caesar kódolással egy txt fájlba írja soronként.    
             </para>
+			<programlisting language="java"><![CDATA[
+			public class CeasarCoder implements Encoder, Decoder {
 
+				private final int offset;
+
+				public CeasarCoder(int offset) {
+					if (offset < 1 || offset > 127) {
+						throw new IllegalArgumentException("Offset must be between 1 and 127");
+					}
+					this.offset = offset;
+				}
+
+				public CeasarCoder() {
+					this.offset = 1;
+				}
+
+				@Override
+				public String decode(String text) {
+					return buildString(text, character -> (char) ((character - offset) % 128));
+				}
+
+				@Override
+				public String encode(String text) {
+					return buildString(text, character -> (char) ((character + offset) % 128));
+				}
+
+				private String buildString(String text, Function<Character, Character> function) {
+					StringBuilder result = new StringBuilder();
+					for (char character : text.toCharArray()) {
+						if (character != ' ') {
+							result.append(function.apply(character));
+						} else {
+							result.append(character);
+						}
+					}
+					return result.toString();
+				}
+
+			}
+			]]></programlisting>
+			<para>Ebben az osztályban először megadjuk az offsetet, majd leellenőrízzük, hogy 1 és 127 közé esik-e. Majd meghívjuk rá a decode és encode metódust, aztán összerakjuk az eredményt tartalmazó string-et.</para>
+			<programlisting language="java"><![CDATA[
+			public class ConsoleInputToFileCeasarEncoder extends StreamToFileCeasarEncoder {
+
+				public ConsoleInputToFileCeasarEncoder(String fileName, int offset)
+						throws FileNotFoundException {
+					super(System.in, fileName, offset);
+				}
+			}
+			]]></programlisting>
+			<programlisting language="java"><![CDATA[
+			public class StreamToFileCeasarEncoder extends StreamEncoder {
+
+				public StreamToFileCeasarEncoder(InputStream inputStream, String fileName, int offset) throws FileNotFoundException {
+					super(inputStream, new FileOutputStream(fileName), new CeasarCoder(offset));
+				}	
+			}
+			]]></programlisting>
+			<para>Az első osztályban az input fájlt és az offsetet kérjük be, a másodikban pedig meghívjuk a CaesarCoder-t, aminek odaadjuk az offsetet, majd kiírjuk az eredményt egy output fájlba</para>
+			<programlisting language="java"><![CDATA[
+			public class StreamEncoder implements AutoCloseable {
+
+				private static final byte[] NEW_LINE = "\n".getBytes();
+				
+				private Scanner inputScanner;
+				private OutputStream outputStream;
+				private Encoder encoder;
+
+				public StreamEncoder(InputStream inputStream, OutputStream outputStream, Encoder encoder) {
+					this.inputScanner = new Scanner(inputStream);
+					this.outputStream = outputStream;
+					this.encoder = encoder;
+				}
+
+				public void handleInputs() throws IOException {
+					String line;
+					do {
+						line = inputScanner.nextLine();
+						String encodedLine = encoder.encode(line);
+						outputStream.write(encodedLine.getBytes());
+						outputStream.write(NEW_LINE);
+					} while (!"exit".equals(line));
+				}
+
+				@Override
+				public void close() throws IOException {
+					inputScanner.close();
+					outputStream.close();
+				}
+
+			}
+
+			]]></programlisting>
+			<para>Csinálunk egy StreamEncoder buildert, majd a handleInputs metódusban encodeoljuk a sorokat amíg exit-et nem olvasunk.</para>
+			<programlisting language="java"><![CDATA[
+			public interface Decoder {
+
+				String decode(String code);
+				
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public interface Encoder {
+
+				String encode(String text);
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class Main {
+
+				public static void main(String[] args) throws IOException {
+					String fileName = args[0];
+					int offset = Integer.valueOf(args[1]);
+					try (StreamEncoder handler = new ConsoleInputToFileCeasarEncoder(fileName, offset)) {
+						handler.handleInputs();
+					}
+				}
+
+			}
+			]]></programlisting>
+			<figure>
+            <title>Console Input</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/caesar1.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Console Input</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			<figure>
+            <title>Output</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/caesar2.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Output</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			
     </section>
-        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                              
 </chapter>           

@@ -7,82 +7,774 @@
     </info>
 
     <section>
-        <title>Port scan</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>AOP</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>Android Játék</title>
-        	<para>
-                Fealadatleírás, ZÖLD FELADAT
-            </para>
-
-    </section>
-
-    <section>
-        <title>Junit teszt</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>     
-
-    <section>
-        <title>OSCI</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>OSCI2</title>
-        	<para>
-                Fealadatleírás, KÉK FELADAT
-            </para>
-
-    </section>
-
-    <section>
-        <title>OSCI3</title>
-        	<para>
-                Fealadatleírás, KÉK FELADAT
-            </para>
-
-    </section>
-
-    <section>
         <title>EPAM: DI</title>
         	<para>
-                Fealadatleírás
+                Implementálj egy alap DI (Dependency Injection) keretrendszert Java-ban annotációk és reflexió használatával megvalósítva az IoC-t (Inversion Of Control). 
             </para>
+			<programlisting language="java"><![CDATA[
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Retention;
+			import java.lang.annotation.RetentionPolicy;
+			import java.lang.annotation.Target;
+
+			@Target(ElementType.METHOD)
+			@Retention(RetentionPolicy.RUNTIME)
+			public @interface Bean {
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Retention;
+			import java.lang.annotation.RetentionPolicy;
+			import java.lang.annotation.Target;
+
+			@Target(ElementType.PARAMETER)
+			@Retention(RetentionPolicy.RUNTIME)
+			public @interface Qualifier {
+
+				public String name();
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			import com.epam.training.di.Configuration;
+			import com.epam.training.di.DiContext;
+			import com.epam.training.di.annotation.Bean;
+			import com.epam.training.di.annotation.Qualifier;
+
+			public class DiContextBuilder {
+
+				public DiContext build(Configuration contextConfiguration) {
+					DiContext context = new DiContextImpl();
+
+					List<BeanDefinition> beanDefinitions = new LinkedList<BeanDefinition>();
+
+					for (Method method : contextConfiguration.getClass().getMethods()) {
+						if (isAnnotatedWithBean(method)) {
+							List<BeanDefinitionParameter> beanDependencies = new LinkedList<DiContextBuilder.BeanDefinitionParameter>();
+							for (Parameter parameter : method.getParameters()) {
+								String name = null;
+								if (parameter.getAnnotation(Qualifier.class) != null) {
+									name = parameter.getAnnotation(Qualifier.class).name();
+								}
+								beanDependencies.add(new BeanDefinitionParameter<>(name, parameter.getType()));
+							}
+							beanDefinitions
+									.add(new BeanDefinition(method.getName(), method.getReturnType(), method, beanDependencies));
+						}
+					}
+
+					int beanDefinitionsSize = beanDefinitions.size();
+					context.addBean("context", context);
+
+					while (beanDefinitions.size() > 0) {
+						List<BeanDefinition> resolvedBeanDefinitions = new LinkedList<>();
+						for (BeanDefinition beanDefinition : beanDefinitions) {
+							if (isBeanDefinitionResolvable(beanDefinition, context)) {
+								context.addBean(beanDefinition.name, createBean(beanDefinition, context, contextConfiguration));
+								resolvedBeanDefinitions.add(beanDefinition);
+							}
+						}
+						beanDefinitions.removeAll(resolvedBeanDefinitions);
+
+						if (beanDefinitionsSize == beanDefinitions.size()) {
+							throw new IllegalArgumentException("Circular dependency!");
+						} else {
+							beanDefinitionsSize = beanDefinitions.size();
+						}
+					}
+
+					return context;
+				}
+
+				private Object createBean(BeanDefinition beanDefinition, DiContext context, Object contextConfiguration) {
+					List<Object> dependencies = new ArrayList<>(beanDefinition.dependencies.size());
+
+					for (BeanDefinitionParameter parameter : beanDefinition.dependencies) {
+						Optional<Object> dependency;
+						if (parameter.name != null) {
+							dependency = context.getBean(parameter.name, parameter.type);
+						} else {
+							dependency = context.getBean(parameter.type);
+						}
+						dependencies.add(dependency.get());
+					}
+
+					try {
+						return beanDefinition.builderMethod.invoke(contextConfiguration, dependencies.toArray());
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new IllegalArgumentException(e);
+					}
+				}
+
+				private boolean isBeanDefinitionResolvable(BeanDefinition beanDefinition, DiContext context) {
+					for (BeanDefinitionParameter parameter : beanDefinition.dependencies) {
+						Optional<Object> dependency;
+						if (parameter.name != null) {
+							dependency = context.getBean(parameter.name, parameter.type);
+						} else {
+							dependency = context.getBean(parameter.type);
+						}
+						if (dependency.isEmpty()) {
+							return false;
+						}
+					}
+					return true;
+				}
+
+				private boolean isAnnotatedWithBean(Method method) {
+					for (Annotation annotation : method.getDeclaredAnnotations()) {
+						if (annotation.annotationType().equals(Bean.class)) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+				private class BeanDefinition {
+					String name;
+					Class type;
+					Method builderMethod;
+					List<BeanDefinitionParameter> dependencies;
+
+					public BeanDefinition(String name, Class type, Method builderMethod,
+							List<BeanDefinitionParameter> dependencies) {
+						super();
+						this.name = name;
+						this.type = type;
+						this.builderMethod = builderMethod;
+						this.dependencies = dependencies;
+					}
+				}
+
+				private class BeanDefinitionParameter<T> {
+					String name;
+					Class<T> type;
+
+					public BeanDefinitionParameter(String name, Class<T> type) {
+						super();
+						this.name = name;
+						this.type = type;
+					}
+				}
+
+			}
+
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class DiContextImpl implements DiContext {
+
+				private Map<String, Object> context = new HashMap<>();
+				private Map<Class<\?>, List<Object>> contextMappedByType = new HashMap<>();
+
+				public void addBean(String beanName, Object bean) {
+					if (context.containsKey(beanName)) {
+						throw new IllegalArgumentException("Bean has been already created: " + beanName);
+					}
+					context.put(beanName, bean);
+					if (contextMappedByType.containsKey(bean.getClass())) {
+						contextMappedByType.get(bean.getClass()).add(bean);
+					} else {
+						List<Object> objectList = new LinkedList<>();
+						objectList.add(bean);
+						contextMappedByType.put(bean.getClass(), objectList);
+					}
+				}
+
+				@SuppressWarnings("unchecked")
+				public <T> Optional<T> getBean(String beanName, Class<T> clazz) {
+					Optional<T> ret = null;
+					if (context.containsKey(beanName)) {
+						ret = Optional.of((T) context.get(beanName));
+					} else {
+						ret = Optional.empty();
+					}
+					return ret;
+				}
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public <T> Optional<T> getBean(Class<T> clazz) {
+					Optional<T> ret = null;
+					List<Object> objestList = contextMappedByType.get(clazz);
+					if (objestList == null) {
+						ret = Optional.empty();
+					} else if (objestList.size() != 1) {
+						throw new IllegalArgumentException("There are multiple bean available for type: " + clazz);
+					} else {
+						ret = Optional.of((T) objestList.get(0));
+					}
+					return ret;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public interface Configuration {
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public interface DiContext {
+
+				public void addBean(String beanName, Object bean);
+
+				public <T> Optional<T> getBean(String beanName, Class<T> clazz);
+
+				public <T> Optional<T> getBean(Class<T> clazz);
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			import static org.junit.jupiter.api.Assertions.assertEquals;
+			import static org.junit.jupiter.api.Assertions.assertThrows;
+			import static org.junit.jupiter.api.Assertions.assertTrue;
+
+			import java.util.Optional;
+
+			import org.junit.jupiter.api.Test;
+
+			import com.epam.training.di.Configuration;
+			import com.epam.training.di.DiContext;
+			import com.epam.training.di.annotation.Bean;
+			import com.epam.training.di.annotation.Qualifier;
+
+			public class DiContextImplIntegrationTest {
+
+				private DiContext context = new DiContextBuilder().build(new DiContextImplIntegrationTest.ContextConfig());
+
+				@Test
+				public void testGetBeanShouldReturnWithStringAWhenThisBeanExists() {
+					// Given
+					String expected = "StringA";
+
+					// When
+					Optional<String> actual = context.getBean("stringBeanA", String.class);
+
+					// Then
+					assertTrue(actual.isPresent());
+					assertEquals(expected, actual.get());
+				}
+
+				@Test
+				public void testGetBeanShouldReturnWithStringBWhenThisBeanExists() {
+					// Given
+					String expected = "StringB";
+
+					// When
+					Optional<String> actual = context.getBean("stringBeanB", String.class);
+
+					// Then
+					assertTrue(actual.isPresent());
+					assertEquals(expected, actual.get());
+				}
+
+				@Test
+				public void testGetBeanShouldReturnWithIntegerBeanWhenGetIsCalledWithTypeOnly() {
+					// Given
+					Integer expected = 10;
+
+					// When
+					Optional<Integer> actual = context.getBean(Integer.class);
+
+					// Then
+					assertTrue(actual.isPresent());
+					assertEquals(expected, actual.get());
+				}
+
+				@Test
+				public void testGetBeanShouldReturnWithStringBuilderBeanWhenGetIsCalledWithTypeOnly() {
+					// Given
+					String expected = "StringA10";
+
+					// When
+					Optional<StringBuilder> actual = context.getBean(StringBuilder.class);
+
+					// Then
+					assertTrue(actual.isPresent());
+					assertEquals(expected, actual.get().toString());
+				}
+
+				@Test
+				public void testGetBeanShouldReturnWithOptionalEmptyWhenBeanDoesNotExist() {
+					// Given
+
+					// When
+					Optional<String> actual = context.getBean("stringBean", String.class);
+
+					// Then
+					assertTrue(actual.isEmpty());
+				}
+
+				@Test
+				public void testGetBeanShouldThrowAnExceptionWhenMoreBeansAreAvailable() {
+					// Given
+
+					// When Then
+					assertThrows(IllegalArgumentException.class, () -> context.getBean(String.class));
+				}
+
+				public static class ContextConfig implements Configuration {
+
+					@Bean
+					public String stringBeanA() {
+						return "StringA";
+					}
+
+					@Bean
+					public String stringBeanB() {
+						return "StringB";
+					}
+
+					@Bean
+					public Integer integerBean() {
+						return 10;
+					}
+
+					@Bean
+					public StringBuilder stringBuilder(@Qualifier(name = "stringBeanA") String string, Integer integer) {
+						return new StringBuilder(string).append(integer);
+					}
+
+				}
+
+			}
+
+			]]></programlisting>
 
     </section>
 
     <section>
         <title>EPAM: JSON szerializáció</title>
         	<para>
-                Fealadatleírás
-            </para>
+                Implementálj egy JSON szerializációs könyvtárat, mely képes kezelni sztringeket, számokat, listákat és beágyazott objektumokat. A megoldás meg kell feleljen az összes adott unit tesztnek.</para>
+			<para>
+				Plusz feladat: a könyvtár tudjon deszerializálni</para>
+				
+			<programlisting language="java"><![CDATA[
+			public class BooleanSerializer implements Serializer<Boolean> {
+
+				@Override
+				public String serialize(Boolean obj, Serializer<Object> mainSerializer) {
+					return obj ? "true" : "false";
+				}
+
+				@Override
+				public Class<Boolean> getSourceClass() {
+					return Boolean.class;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class ListSerializer implements Serializer<List> {
+
+				@Override
+				public String serialize(List obj, Serializer<Object> mainSerializer) {
+					return (String) obj.stream()
+							.map(o -> mainSerializer.serialize(o, mainSerializer))
+							.collect(Collectors.joining(",", "[", "]"));
+				}
+
+				@Override
+				public Class<List> getSourceClass() {
+					return List.class;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class MainSerializer implements Serializer<Object> {
+
+				private final List<Serializer<\?>> serializerList;
+				private final Serializer<\?> nullSerializer;
+
+				public MainSerializer(List<Serializer<\?>> serializerList, Serializer<\?> nullSerializer) {
+					this.serializerList = serializerList;
+					this.nullSerializer = nullSerializer;
+				}
+
+				@Override
+				public String serialize(Object obj, Serializer<Object> mainSerializer) {
+					Serializer<Object> selectedSerializer = (Serializer<Object>) selectSerializer(obj);
+					return selectedSerializer.serialize(obj, this);
+				}
+
+				@Override
+				public Class<Object> getSourceClass() {
+					return Object.class;
+				}
+
+				private Serializer<\?> selectSerializer(Object obj) {
+					return serializerList.stream()
+							.filter(serializer -> serializer.getSourceClass().isInstance(obj))
+							.findFirst()
+							.orElse(nullSerializer);
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class NullSerializer implements Serializer<Object> {
+
+				@Override
+				public String serialize(Object obj, Serializer<Object> mainSerializer) {
+					return "null";
+				}
+
+				@Override
+				public Class<Object> getSourceClass() {
+					return Object.class;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class NumberSerializer implements Serializer<Number> {
+
+				@Override
+				public String serialize(Number obj, Serializer<Object> mainSerializer) {
+					return obj.toString();
+				}
+
+				@Override
+				public Class<Number> getSourceClass() {
+					return Number.class;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class ObjectSerializer implements Serializer<Object> {
+
+				@Override
+				public String serialize(Object obj, Serializer<Object> mainSerializer) {
+					return Arrays.stream(obj.getClass().getDeclaredFields())
+							.map(field -> {
+								try {
+									String name = field.getName();
+
+									if (!field.canAccess(obj)) {
+										field.setAccessible(true);
+									}
+
+									String value = mainSerializer.serialize(field.get(obj), mainSerializer);
+
+									return String.format("\"%s\":%s", name, value);
+								} catch (IllegalAccessException e) {
+									e.printStackTrace();
+								}
+								return "";
+							})
+							.collect(Collectors.joining(",", "{", "}"));
+				}
+
+				@Override
+				public Class<Object> getSourceClass() {
+					return Object.class;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public interface Serializer<T> {
+
+				/**
+				 * Returns the given object serialized into JSON.
+				 * @param obj object to be serialized
+				 * @param mainSerializer main entry point for serialization
+				 * @return given object in JSON serialized form
+				 */
+				String serialize(T obj, Serializer<Object> mainSerializer);
+
+				/**
+				 * Returns source class, used for serializer selection during object processing.
+				 * @return serialization source class
+				 */
+				Class<T> getSourceClass();
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class StringSerializer implements Serializer<String> {
+
+				@Override
+				public String serialize(String obj, Serializer<Object> mainSerializer) {
+					return "\""+obj+"\"";
+				}
+
+				@Override
+				public Class<String> getSourceClass() {
+					return String.class;
+				}
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class MiniObjectMapper {
+
+			  private static final Serializer<\?> nullSerializer = new NullSerializer();
+			  private static final List<Serializer<,\?>> SERIALIZER_LIST = List.of(
+					  new StringSerializer(),
+					  new NumberSerializer(),
+					  new BooleanSerializer(),
+					  new ListSerializer(),
+					  new ObjectSerializer()
+			  );
+
+			  private final MainSerializer mainSerializer;
+
+			  /**
+			   * Creates a new MiniObjectMapper instance.
+			   */
+			  public MiniObjectMapper() {
+				this.mainSerializer = new MainSerializer(SERIALIZER_LIST, nullSerializer);
+			  }
+
+			  /**
+			   * Creates a new MiniObjectMapper instance with the additional given serializers.
+			   * @param customSerializerList custom serializer list to be used
+			   */
+			  public MiniObjectMapper(List<Serializer<\?>> customSerializerList) {
+				List<Serializer<\?>> finalSerializerList = new ArrayList<>(customSerializerList);
+				finalSerializerList.addAll(SERIALIZER_LIST);
+				this.mainSerializer = new MainSerializer(finalSerializerList, nullSerializer);
+			  }
+
+			  /**
+			   * Returns the given object serialized into JSON.
+			   * @param obj object to be serialized
+			   * @return given object in JSON serialized form
+			   */
+			  public String toJson(Object obj) {
+				return mainSerializer.serialize(obj, mainSerializer);
+			  }
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class ExampleData {
+
+			  private final String string;
+			  private final int primitiveInt;
+			  private final Integer boxedInt;
+			  private final Long boxedLong;
+			  private final Double boxedDouble;
+			  private final List<String> stringList;
+			  private final InnerData innerData;
+			  private final boolean aBoolean;
+
+			  public ExampleData(String string, int primitiveInt, Integer boxedInt, Long boxedLong, Double boxedDouble, List<String> stringList, InnerData innerData, boolean aBoolean) {
+				this.string = string;
+				this.primitiveInt = primitiveInt;
+				this.boxedInt = boxedInt;
+				this.boxedLong = boxedLong;
+				this.boxedDouble = boxedDouble;
+				this.stringList = stringList;
+				this.innerData = innerData;
+				this.aBoolean = aBoolean;
+			  }
+
+			  public String getString() {
+				return string;
+			  }
+
+			  public int getPrimitiveInt() {
+				return primitiveInt;
+			  }
+
+			  public Integer getBoxedInt() {
+				return boxedInt;
+			  }
+
+			  public Long getBoxedLong() {
+				return boxedLong;
+			  }
+
+			  public Double getBoxedDouble() {
+				return boxedDouble;
+			  }
+
+			  public List<String> getStringList() {
+				return stringList;
+			  }
+
+			  public InnerData getInnerData() {
+				return innerData;
+			  }
+
+			  public boolean isaBoolean() {
+				return aBoolean;
+			  }
+
+			  public static class InnerData {
+				private final String innerString;
+				private final int innerPrimitiveInt;
+				private final Object nullObject = null;
+
+				public InnerData(String innerString, int innerPrimitiveInt) {
+				  this.innerString = innerString;
+				  this.innerPrimitiveInt = innerPrimitiveInt;
+				}
+
+				public String getInnerString() {
+				  return innerString;
+				}
+
+				public int getInnerPrimitiveInt() {
+				  return innerPrimitiveInt;
+				}
+
+				public Object getNullObject() {
+				  return nullObject;
+				}
+			  }
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class MiniObjectMapperTest {
+
+				public static final String TEST_STRING = "string";
+				public static final Long TEST_NUMBER = 12345L;
+				private final ObjectMapper objectMapper = new ObjectMapper();
+
+				private final MiniObjectMapper underTest = new MiniObjectMapper();
+
+				@ParameterizedTest
+				@MethodSource("provideTestCases")
+				public void toJsonShouldWorkAsJacksonObjectMapperWhenSerializing(Object obj) throws JsonProcessingException {
+					// Given
+					String expected = objectMapper.writeValueAsString(obj);
+
+					// When
+					String actual = underTest.toJson(obj);
+
+					// Then
+					assertThat(actual, equalTo(expected));
+				}
+
+				private static Stream<Arguments> provideTestCases() {
+					return Stream.of(
+							Arguments.of(generateExampleData()),
+							Arguments.of(TEST_STRING),
+							Arguments.of(TEST_NUMBER),
+							Arguments.of(TEST_NUMBER.intValue()),
+							Arguments.of(List.of(generateExampleData(), generateExampleData())),
+							Arguments.of(true),
+							Arguments.of((Object) null)
+					);
+				}
+
+				private static ExampleData generateExampleData() {
+					ExampleData.InnerData innerData = new ExampleData.InnerData("innerStringSerialized", 2131);
+					return new ExampleData(
+							"outerStringSerialized",
+							1113,
+							1134,
+							1515L,
+							3.141592654,
+							Arrays.asList("first", "second", "third"),
+							innerData,
+							false);
+				}
+			}
+			]]></programlisting>
 
     </section>
 
     <section>
         <title>EPAM: Kivételkezelés</title>
         	<para>
-                Fealadatleírás
+                Adott az alábbi kódrészlet. Mi történik, ha az input változó 1F, “string” vagy pedig null? Meghívódik e minden esetben a finally ág? Válaszod indokold!
             </para>
+			<figure>
+            <title>Feladat</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/exception.png" scale="50" />
+                </imageobject>
+                <textobject>
+                    <phrase>Feladat</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			
+			<programlisting language="java"><![CDATA[
+			public class ChildException extends ParentException {
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class ParentException extends RuntimeException {
+
+			}
+			]]></programlisting>
+			
+			<programlisting language="java"><![CDATA[
+			public class ExceptionHandling {
+
+				public static void main(String[] args) {
+					System.out.println("Test case when input is null!");
+					test(null);
+
+					try {
+						System.out.println("Test case when input is float!");
+						test(1F);
+					} catch (Exception ignored) {
+						// Ide miért kerül a vezérlés!?
+					}
+
+					System.out.println("Test case when input is String!");
+					test("string");
+				}
+
+				private static void test(Object input) {
+					try {
+						System.out.println("Try!");
+						if (input instanceof Float) {
+							throw new ChildException();
+						} else if (input instanceof String) {
+							throw new ParentException();
+						} else {
+							throw new RuntimeException();
+						}
+					} catch (ChildException e) {
+						System.out.println("Child Exception is caught!");
+						if (e instanceof ParentException) {
+							throw new ParentException();
+						}
+					} catch (ParentException e) {
+						System.out.println("Parent Exception is caught!");
+						System.exit(1);
+					} catch (Exception e) {
+						System.out.println("Exception is caught!");
+					} finally {
+						System.out.println("Finally!\n");
+					}
+				}
+
+			}
+			]]></programlisting>
+			
 
     </section>
 
