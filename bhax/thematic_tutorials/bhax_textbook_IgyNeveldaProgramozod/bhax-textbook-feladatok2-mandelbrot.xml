@@ -26,23 +26,23 @@
 			
 			package order;
 
-public class Costumer {
-    private String name;
-    private String address;
-    private String mobileNumber;
+			public class Costumer {
+				private String name;
+				private String address;
+				private String mobileNumber;
 
-    public String getName() {
-        return name;
-    }
+				public String getName() {
+					return name;
+				}
 
-    public String getAddress() {
-        return address;
-    }
+				public String getAddress() {
+					return address;
+				}
 
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
-}
+				public String getMobileNumber() {
+					return mobileNumber;
+				}
+			}
 			
 			]]></programlisting>
 			
@@ -51,66 +51,66 @@ public class Costumer {
 			<programlisting language="java"><![CDATA[
 			package order;
 
-public class Item {
-    private String name;
-    private int price;
+			public class Item {
+				private String name;
+				private int price;
 
-    public String getName() {
-        return name;
-    }
+				public String getName() {
+					return name;
+				}
 
-    public int getPrice() {
-        return price;
-    }
-}
+				public int getPrice() {
+					return price;
+				}
+			}
 			]]></programlisting>
 			<para>Az Item osztályban a termék nevét, árát és a hozzájuk tartozó gettereket láthatjuk.</para>
 			<programlisting language="java"><![CDATA[
 			package order;
 
-public enum DeliveryType {
-    NO_DELIVERY, GLS
-}
-			
+			public enum DeliveryType {
+				NO_DELIVERY, GLS
+			}
+						
 			]]></programlisting>
 			<para>A DeliveryType enumban megadjuk, hogy milyen szállítási típusok vannak.</para>
 			<programlisting language="java"><![CDATA[
 			package order;
 
-public class Order {
-    private String id;
-    private String date;
-    private int price;
-    private DeliveryType deliveryType;
+			public class Order {
+				private String id;
+				private String date;
+				private int price;
+				private DeliveryType deliveryType;
 
-    public String getId() {
-        return id;
-    }
+				public String getId() {
+					return id;
+				}
 
-    public String getDate() {
-        return date;
-    }
+				public String getDate() {
+					return date;
+				}
 
-    public int getPrice() {
-        return price;
-    }
+				public int getPrice() {
+					return price;
+				}
 
-    public DeliveryType getDeliveryType() {
-        return deliveryType;
-    }
+				public DeliveryType getDeliveryType() {
+					return deliveryType;
+				}
 
-}
-		]]></programlisting>
-		<para>Az Order osztályban a rendeléshez szükséges adatokat és azok gettereit adtam meg.</para>
+			}
+			]]></programlisting>
+			<para>Az Order osztályban a rendeléshez szükséges adatokat és azok gettereit adtam meg.</para>
 		
-		<programlisting language="java"><![CDATA[
-		package order;
+			<programlisting language="java"><![CDATA[
+			package order;
 
-public class SpecialOrder extends Order{
+			public class SpecialOrder extends Order{
 
-}
-		]]></programlisting>
-		<para>A SpecialOrder egy kiegészítés az Order osztályhoz.</para>
+			}
+			]]></programlisting>
+			<para>A SpecialOrder egy kiegészítés az Order osztályhoz.</para>
 		
     </section>
 
@@ -143,96 +143,96 @@ public class SpecialOrder extends Order{
 			<programlisting language="java"><![CDATA[
 			package student;
 
-import java.util.Set;
-import subject.Subject;
+			import java.util.Set;
+			import subject.Subject;
 
-public class Student {
-    private String name;
-    private String neptunId;
-    private Set<Subject> subjects;
+			public class Student {
+				private String name;
+				private String neptunId;
+				private Set<Subject> subjects;
 
-    public String getName() {
-        return name;
-    }
+				public String getName() {
+					return name;
+				}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+				public void setName(String name) {
+					this.name = name;
+				}
 
-    public Set<Subject> getSubjects() {
-        return subjects;
-    }
+				public Set<Subject> getSubjects() {
+					return subjects;
+				}
 
-    public String getNeptunId() {
-        return neptunId;
-    }
+				public String getNeptunId() {
+					return neptunId;
+				}
 
-    public void addSubject(Subject subject){
-        this.subjects.add(subject);
-    }
+				public void addSubject(Subject subject){
+					this.subjects.add(subject);
+				}
 
-    public void removeSubject(Subject subject){
-        this.subjects.remove(subject);
-    }
+				public void removeSubject(Subject subject){
+					this.subjects.remove(subject);
+				}
 
-}
+			}
 			]]></programlisting>
 			<para>A Student classban megadjuk a tanuló nevét, Neptun kódját, valamint egy halmazban eltároljuk a felvett tárgyait. Ezekre beállítjuk a gettereket. Létrehozunk egy addSubject metódust, amivel tárgyakat tudunk hozzáadni a halmazunkhoz, valamint egy removeSubject metódust, amivel törölni tudunk.</para>
 			<programlisting language="java"><![CDATA[
 			package lecturer;
 
-public class Lecturer {
-    private String name;
+			public class Lecturer {
+				private String name;
 
-    public String getName() {
-        return name;
-    }
-}
+				public String getName() {
+					return name;
+				}
+			}
 			]]></programlisting>
 			<para>A Lecturer osztályban az oktató adatait adjuk meg.</para>
 			<programlisting language="java"><![CDATA[
 			package subject;
 
-import java.util.Set;
-import student.Student;
-import lecturer.Lecturer;
+			import java.util.Set;
+			import student.Student;
+			import lecturer.Lecturer;
 
-public class Subject {
-    private String id;
-    private String name;
-    private SubjectType subjectType;
-    private Set<Student> students;
-    private Set<Lecturer> lecturers;
+			public class Subject {
+				private String id;
+				private String name;
+				private SubjectType subjectType;
+				private Set<Student> students;
+				private Set<Lecturer> lecturers;
 
-    public String getId() {
-        return id;
-    }
+				public String getId() {
+					return id;
+				}
 
-    public String getName() {
-        return name;
-    }
+				public String getName() {
+					return name;
+				}
 
-    public SubjectType getSubjectType() {
-        return subjectType;
-    }
+				public SubjectType getSubjectType() {
+					return subjectType;
+				}
 
-    public Set<Student> getStudents() {
-        return students;
-    }
+				public Set<Student> getStudents() {
+					return students;
+				}
 
-    public Set<Lecturer> getLecturers() {
-        return lecturers;
-    }
+				public Set<Lecturer> getLecturers() {
+					return lecturers;
+				}
 
-    public void addNewStudents(Student student){
-        this.students.add(student);
-    }
+				public void addNewStudents(Student student){
+					this.students.add(student);
+				}
 
-    public void addNewLecturers(Lecturer lecturer){
-        this.lecturers.add(lecturer);
-    }
+				public void addNewLecturers(Lecturer lecturer){
+					this.lecturers.add(lecturer);
+				}
 
-}
+			}
 			]]></programlisting>
 			<para>A Subject osztályban a tárgyra vonatkozó adatokat adjuk meg. Létrehozunk majd egy enumot a tárgy típusaira, valamint lesz egy Student és egy Lecturer halmazunk. Itt is ugyanúgy megadjuk a gettereket, valamint két metódust, az egyikkel hallgatókat, a másikkal pedik oktatókat adhatunk a halmazunkhoz.</para>
 			<para>Ezek mellett két alosztályt is létrehozunk, az egyik a CurriculumSubject, a másik pedig a NonCurriculumSubject. Mindkettő a Subject osztályt egészíti ki. </para>
@@ -250,6 +250,5 @@ public class Subject {
 			<para>A YAGNI a "You aren't gonna need it" rövidítése, amely az extrém programozás (XP) alapelve, amely szerint a programozónak csak addig kell hozzáadnia a funkciókat, amíg szükségesnek nem találják. Az XP társalapítója, Ron Jeffries azt írta: "Mindig akkor hajtsa végre a dolgokat, amikor valóban szüksége van rájuk, soha ne, amikor csak azt látja, hogy szüksége van rájuk." Számos egyéb gyakorlattal kombinálva, például folyamatos refaktorálással, folyamatos automatizált egységteszteléssel és folyamatos integrációval kívánják használni. Folyamatos refaktorálás nélkül használva rendezetlen kódhoz és hatalmas átdolgozáshoz vezethet, amelyet technical debt-nek neveznek.</para>
 
     </section>    
-        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                              
 </chapter>                

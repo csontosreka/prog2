@@ -348,6 +348,23 @@
 			}
 
 			]]></programlisting>
+			<para>A számítógép-programozásban a dependency injection egy technika, aminek lényege, hogy egy objektum más objektumok függőségeit elégíti ki. A függőséget felhasználó objektum szolgáltatást nyújt, az injekció pedig ennek a függőségnek az átadása a kliens részére. A szolgáltatás a kliens állapotának része. A minta alapkövetelménye a szolgáltatás kliensnek való átadása ahelyett, hogy a szolgáltató objektumot a kliens hozná létre.</para>
+
+			<para>A szolgáltató osztály szempontjából ez azt jelenti, hogy a kliens nem hívhat rajta konstruktort, vagy statikus metódust. Paramétereit más osztályoktól kapja, azok állítják be. A függőséget előállítja valaki más, például a kontextus vagy a konténer problémája lesz.</para>
+
+			<para>A minta célja, hogy annyira leválassza a szolgáltató objektumot a kliensről, hogy ha kicserélik, akkor ne kelljen módosítani a klienst.</para>
+
+			<para>A dependency injection a vezérlés megfordításának egyik formája. Ahelyett, hogy az alacsony szintű kód hívná a magas szintűt, a magas szintű fogadja az alacsony szintűt, amit hívhat. Ez megfordítja a procedurális programozás szokásos vezérlési mintáját.</para>
+			<para> dependency injection a következő problémákat oldja meg:</para>
+
+			<para> - Hogyan lehet az alkalmazás független attól, hogyan hozzák létre az objektumait?</para>
+			<para> - Hogyan lehet egy objektum független attól, hogy az általa megkövetelt objektumok hogyan jönnek létre?</para>
+			<para> - Hogyan lehet elérni azt, hogy minden objektum tulajdonságait külön konfigurációs fájlban lehessen megadni?</para>
+			<para> - Hogyan támogathat az alkalmazás több különböző konfigurációt?</para>
+			<para>A dependency injection fajtái:</para>
+			<para> - Konstruktor injekció: a szolgáltató objektumokról a konstruktor gondoskodik.</para>
+			<para> - Szetter injekció: a szolgáltató objektumot a szetter igényli</para>
+			<para> - Interfész injekció: a szolgáltató objektumnak van injektáló metódusa, ami injektálja bármely kliensbe, amit megkap paraméterként. A klienseknek meg kell valósítaniuk egy interfészt, ami előír egy szetter metódust, ami fogadja az injekciót.</para>
 
     </section>
 
@@ -709,7 +726,7 @@
             <title>Feladat</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/exception.png" scale="50" />
+                    <imagedata fileref="img/exception.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>Feladat</phrase>
@@ -774,10 +791,23 @@
 
 			}
 			]]></programlisting>
+			<figure>
+            <title>Output</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="img/exception2.png" scale="100" />
+                </imageobject>
+                <textobject>
+                    <phrase>Output</phrase>
+                </textobject>
+            </mediaobject>
+			</figure>
+			<para>null esetén: meghívjuk a test metódust, aminek null lesz az inputja. Belépünk a try ágba, majd RuntimeException-t fogunk dobni, amit az Exception catch ágban fogunk elkapni. Ezek után a finally ág is le fog futni. </para>
+			<para>Float esetén: A try ágban mivel az input a Float része ezért ChildException-t fogunk dobni, amit a ChildException catch ágban fogunk elkapni. Itt is lefut a finally ág.</para>
+			<para>String esetén: a try ágban mivel az input String, ezért ParentException-t fogunk dobni. Ezt a ParentException catch ágban kapunk el. Az itt lévő System.exit(1); parancs miatt leáll a program, és nem hívódik meg a finally ág.</para>
 			
 
     </section>
 
-        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                                                                                                                
 </chapter>           

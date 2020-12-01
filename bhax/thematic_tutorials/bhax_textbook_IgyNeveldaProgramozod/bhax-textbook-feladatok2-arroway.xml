@@ -7,63 +7,11 @@
     </info>
 
     <section>
-        <title>A BPP algoritmus Java megvalósítása</title>
-        <para>
-            Ez már a Prog2, de előre dolgozhatsz a nyári szünetben!
-        </para>
-        <para>
-            Megoldás forrása: <link xlink:href="https://regi.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/apas03.html">https://regi.tankonyvtar.hu/hu/tartalom/tkt/javat-tanitok-javat/apas03.html</link>               
-        </para>
-    </section>        
-
-    <section>
-        <title>Java osztályok a Pi-ben</title>
-        <para>
-            Az előző feladat kódját fejleszd tovább: vizsgáld, hogy Vannak-e Java osztályok a Pi hexadecimális kifejtésében!
-        </para>
-
-    </section>
-
-    <section>
-        <title>INNEN KEZDŐDNEK A SYLLABUS SZERINTI FELADATOK</title>
-        <para>
-            Ha szükséged van feladatleírásra  <link xlink:href="https://drive.google.com/drive/folders/1NRZkvRTdbZHy0lanTcksEpc9VXlSFlYZ">itt van a syllabus</link> 
-        </para>
-
-    </section>          
-        
-    <section>
-        <title>OO szemlélet</title>
-            <para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-
-	<section>
-        <title>Homokózó</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
-        <title>„Gagyi”</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
-    </section>
-
-    <section>
         <title>Yoda</title>
         	<para>
-                Írjunk olyan Java programot, ami java.lang.NullPointerEx-el leáll, ha nem követjük a Yoda
-conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions</link>
+                Írjunk olyan Java programot, ami java.lang.NullPointerEx-el leáll, ha nem követjük a Yoda conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">https://en.wikipedia.org/wiki/Yoda_conditions</link>
             </para>
-			<para>A Yoda egy olyan programozási stylus, ahol a kifejezés két oldalát felcseréljük. Ez a technika segít elkerülni a NullPointerEx-et. Erre mutat példát az alábbi program:</para>
+			<para>A Yoda egy olyan programozási stílus, ahol a kifejezés két oldalát felcseréljük. Ez a technika segít elkerülni a NullPointerEx-et. Erre mutat példát az alábbi program:</para>
 			
 			<programlisting language="java"><![CDATA[
 			
@@ -79,7 +27,7 @@ conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">h
             <title>A program Yoda conditions nélkül</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/yoda1.png" scale="50" />
+                    <imagedata fileref="img/yoda1.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>A program Yoda conditions nélkül</phrase>
@@ -103,7 +51,7 @@ conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">h
             <title>A program Yoda conditions-al</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/yoda2.png" scale="50" />
+                    <imagedata fileref="img/yoda2.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>A program Yoda conditions-al</phrase>
@@ -112,14 +60,6 @@ conditions-t! <link xlink:href="https://en.wikipedia.org/wiki/Yoda_conditions">h
 			</figure>
 			<para>Itt már látszik, hogy csak fel kellett cseréljük az equals két oldalát és máris működik a program.</para>
 			
-    </section>
-
-    <section>
-        <title>Kódolás from scratch</title>
-        	<para>
-                Fealadatleírás
-            </para>
-
     </section>
 
     <section>
@@ -186,5 +126,5 @@ objektumorientált paradigmát, igyekezve kiemelni az objektumorientált paradig
             </link></para>
 
     </section>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+
 </chapter>                

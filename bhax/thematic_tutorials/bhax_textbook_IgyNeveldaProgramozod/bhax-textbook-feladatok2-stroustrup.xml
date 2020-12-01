@@ -46,7 +46,7 @@
             <title>Output</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/bintree.png" scale="50" />
+                    <imagedata fileref="img/bintree.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>Output</phrase>
@@ -229,6 +229,5 @@
 			<para>Általában, hogy az OutOfMemoryError egy blokkmemória-kiosztás miatt következik be, amely nem elégedett a kupac megmaradt erőforrásaival. Amikor egy hiba eldobásra kerül, a kupac ugyanannyi allokált objektumot tartalmaz, mint a sikertelen kiosztás előtt, és ideje, hogy eldobja a futásidejű objektumok hivatkozásait, hogy még több memória felszabadulhasson, aminek tisztításra lehet szüksége. Ezekben az esetekben kockázatos folytatni, hiszen nem lehetünk benne teljesen biztosak, hogy a JVM javítható állapotban van.</para>
 
     </section>     
-        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+                              
 </chapter>           

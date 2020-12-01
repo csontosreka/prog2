@@ -328,7 +328,7 @@
             <title>Console Input</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/caesar1.png" scale="50" />
+                    <imagedata fileref="img/caesar1.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>Console Input</phrase>
@@ -339,7 +339,7 @@
             <title>Output</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/caesar2.png" scale="50" />
+                    <imagedata fileref="img/caesar2.png" scale="150" />
                 </imageobject>
                 <textobject>
                     <phrase>Output</phrase>

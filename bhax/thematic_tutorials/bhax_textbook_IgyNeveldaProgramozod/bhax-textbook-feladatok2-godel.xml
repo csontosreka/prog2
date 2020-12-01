@@ -9,7 +9,7 @@
     <section>
         <title>GIMP Scheme hack</title>
         	<para>
-                Fealadatleírás
+                Ha az előző félévben nem dolgoztad fel a témát (például a mandalás vagy a króm szöveges dobozosat) akkor itt az alkalom!
             </para>
 			<programlisting language = "python"><![CDATA[
 		(
@@ -312,7 +312,7 @@
             <title>List Measurement</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/list_measurement.png" scale="50" />
+                    <imagedata fileref="img/list_measurement.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>List Measurement</phrase>
@@ -324,7 +324,7 @@
             <title>Map Measurement</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/map-measurement.png" scale="50" />
+                    <imagedata fileref="img/map-measurement.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>Map measurement</phrase>
@@ -336,7 +336,7 @@
             <title>Map With Wrong Key Measurement</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="img/map-wrong-key.png" scale="50" />
+                    <imagedata fileref="img/map-wrong-key.png" scale="100" />
                 </imageobject>
                 <textobject>
                     <phrase>Map With Wrong Key Measurement</phrase>
@@ -409,5 +409,5 @@
 			]]></programlisting>
 
     </section> 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+                                                                                                                                      
 </chapter>           
